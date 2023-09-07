@@ -217,7 +217,7 @@ public class Game extends Thread{
             firstEnemy = firstEnemyList.get(i);
             for(int j=0; j<playerAttackList.size(); j++) {
                 playerAttack = playerAttackList.get(j);
-            if(Crash(playerAttack.x+playerAttack.width/2,playerAttack.y+playerAttack.height/2, firstEnemy.posX+firstEnemy.width/2, firstEnemy.posY+firstEnemy.height/2,playerAttack.width,playerAttack.height, firstEnemyAttack.width,firstEnemy.height)) {
+            if(Crash(playerAttack.x+playerAttack.width/2,playerAttack.y+playerAttack.height/2, firstEnemy.posX+firstEnemy.width/2, firstEnemy.posY+firstEnemy.height/2,playerAttack.width,playerAttack.height, firstEnemy.width,firstEnemy.height)) {
                 firstEnemyList.remove(i);   // firstEnemy 제거
                 playerAttackList.remove(j); // 총알 제거
                 boomList.add(new Boom(firstEnemy.posX, firstEnemy.posY, 80, 80));
@@ -231,6 +231,7 @@ public class Game extends Thread{
                 if(Crash(playerAttack.x+playerAttack.width/2,playerAttack.y+playerAttack.height/2,secondEnemy.posX+secondEnemy.width/2, secondEnemy.posY+secondEnemy.height/2, playerAttack.width, playerAttack.height, secondEnemy.width, secondEnemy.height)){
                     secondEnemyList.remove(i);  // secondEnemy 제거
                     playerAttackList.remove(j); // 총알 제거
+                    boomList.add(new Boom(secondEnemy.posX, secondEnemy.posY, 80, 80));
                 }
             }
         }
@@ -241,6 +242,7 @@ public class Game extends Thread{
                 if(Crash(playerAttack.x+playerAttack.width/2, playerAttack.y+ playerAttack.height/2, thirdEnemy.posX+thirdEnemy.width/2, thirdEnemy.posY+thirdEnemy.height/2, playerAttack.width,playerAttack.height, thirdEnemy.width, thirdEnemy.height)){
                     thirdEnemyList.remove(i);
                     playerAttackList.remove(j);
+                    boomList.add(new Boom(thirdEnemy.posX, thirdEnemy.posY, 80, 80));
                 }
             }
         }
@@ -352,15 +354,15 @@ public class Game extends Thread{
                 g.drawImage(boom.image4, boom.posX, boom.posY, null);
             } else if (boom.cnt <= 128) {
                 g.drawImage(boom.image5, boom.posX, boom.posY, null);
-            } else if (boom.cnt <= 164) {
+            } else if (boom.cnt <= 160) {
                 g.drawImage(boom.image6, boom.posX, boom.posY, null);
-            } else if (boom.cnt <= 196) {
+            } else if (boom.cnt <= 192) {
                 g.drawImage(boom.image7, boom.posX, boom.posY, null);
-            } else if (boom.cnt <= 228) {
+            } else if (boom.cnt <= 224) {
                 g.drawImage(boom.image8, boom.posX, boom.posY, null);
             }
             boom.show();
-            if(boom.cnt==228){
+            if(boom.cnt==224){
                 boomList.remove(i);
             }
         }
