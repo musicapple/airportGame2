@@ -12,7 +12,6 @@ public class Game extends Thread{
     private int cnt;
     private long startTime;    // 프로그램 실행 시작 시간
     private long endTime;   // 쓰레드 종료되는 시간
-    private int boomCnt;
 
     private int firstEnemyDrawCount = 0;    // firstEnemy 적기 그려지는 횟수
     private int secondEnemyDrawCount = 0;   // secondEnemy 적기 그려지는 횟수
@@ -29,7 +28,13 @@ public class Game extends Thread{
     private boolean up, down, right, left, shooting;  // 플레이어의 움직임을 제어할 변수
     private Image gameScreenRed = new ImageIcon("src/images/game_screenRed.png").getImage();
     private boolean isGameScreenRed;
-//---------------적 공격 선언 ----------------------------------------------------------
+    private boolean movingDrop;
+    private boolean movingRight;
+    private boolean movingLeft;
+    private boolean movingUnder;
+    private boolean movingOn;
+
+    //---------------적 공격 선언 ----------------------------------------------------------
     ArrayList<PlayerAttack> playerAttackList = new ArrayList<>(); // 미사일이 하나만 발사되는게 아니라 여러개 발사됨.
     private PlayerAttack playerAttack; // 미사일
 
@@ -53,9 +58,10 @@ public class Game extends Thread{
     private SpeedEnemy speedEnemy;  // 빠르게 등장해서 요격하고 사라지는 적기체
 //-------------------폭발 선언--------------------------------------------------------------
     ArrayList<Boom> boomList = new ArrayList<>(); // 폭발을 여러번함.
-    private Boom boom;
-    ;  // 적 격추했을 때 발생하는 폭발 이미지
-//-------------------------------------------------------------------------------------
+    private Boom boom; // 적 격추했을 때 발생하는 폭발 이미지
+//--------------------헤비 머신건(아이템) 선언------------------------------------------------
+    private Item item;
+//---------------------------------------------------------------------------------------
     @Override
     public void run() { // run메소드는 이 쓰레드를 시작할 시 실행될 내용
         cnt = 0;
@@ -69,7 +75,9 @@ public class Game extends Thread{
                     keyProcess();
                     playerAttackProcess();
                     firstEnemyAppearProcess();
+                    itemAppearProcess();
                     firstEnemyMoveProcess();
+                    itemMoveProcess();
                     firstEnemyAttackProcess();
                     secondEnemyAppearProcess();
                     secondEnemyMoveProcess();
@@ -274,6 +282,56 @@ public class Game extends Thread{
             secondEnemyAttack.fire();
         }
     }
+    //----------------------헤비 머신건(아이템) 생성-------------------------------------
+    private void itemAppearProcess(){
+        if(item == null){
+            item = new Item(0,0);
+        }
+    }
+    //----------------------헤비 머신건(아이템) 움직임-----------------------------------
+    private void itemMoveProcess(){
+        System.out.println("움직임시작.");
+        if(item.posX+item.width>=Main.SCREEN_WIDTH){ // 오른쪽 벽 부딪침
+            System.out.println("오른쪽 벽 부딪침");
+            movingRight=true;
+            movingLeft=false;
+            movingUnder=false;
+            movingDrop=false;
+        }
+        if(movingRight) {
+            item.rightMove();
+        }
+        if(item.posY+item.height>Main.SCREEN_HEIGHT){   // 아래쪽 벽 부딪침
+            System.out.println("아래쪽 벽 부딪침");
+            movingRight=false;
+            movingLeft=false;
+            movingUnder=true;
+            movingDrop=false;
+        }
+        if(movingUnder){
+            item.underMove();
+        }
+        if(item.posX<0){    // 왼쪽 벽 튕길 때
+            System.out.println("왼쪽 벽 부딪침");
+            movingRight = false;
+            movingLeft = true;
+            movingUnder = false;
+            movingDrop = false;
+        }
+        if(movingLeft) {
+            item.leftMove();
+        }
+        if(item.posY<=0){   // 위쪽 벽 튕길 때 및 아이템 생길 때
+            System.out.println("위쪽 벽 부딪침");
+            movingRight = false;
+            movingLeft = false;
+            movingUnder = false;
+            movingDrop = true;
+        }
+        if(movingDrop) {
+            item.dropMove();
+        }
+    }
     //--------------------- 충돌 판정 메서드 -------------------------------------------
     public boolean Crash(int x1, int y1, int x2, int y2, int w1, int h1, int w2, int h2){
         boolean check = false;
@@ -296,6 +354,7 @@ public class Game extends Thread{
         firstEnemyAttackDraw(g);
         secondEnemyAttackDraw(g);
         boomDraw(g);
+        itemDraw(g);
     }
     public void playerDraw(Graphics g) {
         g.drawImage(player,playerX,playerY,playerWidth, playerHeight,null);
@@ -343,7 +402,7 @@ public class Game extends Thread{
     public void boomDraw(Graphics g) {  // 적기체 연쇄폭발 이미지
         for (int i = 0; i < boomList.size(); i++) {
             boom = boomList.get(i);
-            System.out.println(boom.cnt);
+            //System.out.println(boom.cnt);
             if (boom.cnt <= 8) {
                 g.drawImage(boom.image1, boom.posX, boom.posY, null);
             } else if (boom.cnt <= 32) {
@@ -365,6 +424,12 @@ public class Game extends Thread{
             if(boom.cnt==224){
                 boomList.remove(i);
             }
+        }
+    }
+    public void itemDraw(Graphics g) {
+        if (item != null && item.image != null) {
+            System.out.println("그리기 시작");
+            g.drawImage(item.image, item.posX, item.posY, null);
         }
     }
     // -----------------------------------------------------------------------------------

@@ -3,10 +3,10 @@ package test2;
 import java.util.Scanner;
 
 public class Main {
-
+    private ABC abc = new ABC();
+    private ABC d;
     public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        String str = sc.next();
-        System.out.println(str);
+        Main m = new Main();
+        m.d = new ABC();
     }
 }
