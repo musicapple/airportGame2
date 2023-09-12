@@ -33,6 +33,7 @@ public class Game extends Thread{
     private boolean movingLeft;
     private boolean movingUnder;
     private boolean movingOn;
+    private boolean itemCollisionWithPlayer; // 아이템과 플레이가 충돌했을때
 
     //---------------적 공격 선언 ----------------------------------------------------------
     ArrayList<PlayerAttack> playerAttackList = new ArrayList<>(); // 미사일이 하나만 발사되는게 아니라 여러개 발사됨.
@@ -75,11 +76,11 @@ public class Game extends Thread{
                     keyProcess();
                     playerAttackProcess();
                     firstEnemyAppearProcess();
-                    itemAppearProcess();
                     firstEnemyMoveProcess();
-                    itemMoveProcess();
                     firstEnemyAttackProcess();
                     secondEnemyAppearProcess();
+                    itemAppearProcess();
+                    itemMoveProcess();
                     secondEnemyMoveProcess();
                     secondEnemyAttackProcess();
                     thirdEnemyAppearProcess();
@@ -105,8 +106,13 @@ public class Game extends Thread{
         if(right && playerX + playerWidth + playerSpeed < Main.SCREEN_WIDTH)
             playerX += playerSpeed;
         if(shooting && cnt % 8 == 0) { // 0, 0.24, 0.48, 0.72, 0.96 ,... 이 때 눌러야 실행됨.
-            playerAttack = new PlayerAttack(playerX+player.getWidth(null)/2, playerY - 10); // 미사일이 player 좌표의 50만큼 위에서부터 생성됨.
-            playerAttackList.add(playerAttack);
+            if(!itemCollisionWithPlayer) {  // 기본공격
+                playerAttack = new PlayerAttack(new ImageIcon("src/images/player_attack.png").getImage(), playerX + player.getWidth(null) / 2, playerY - 10); // 미사일이 player 좌표의 50만큼 위에서부터 생성됨.
+                playerAttackList.add(playerAttack);
+            } else if(itemCollisionWithPlayer){ // 헤비머신건 공격
+                playerAttack = new PlayerAttack(new ImageIcon("src/images/bullet2.png").getImage(), playerX + player.getWidth(null) / 2, playerY - 10); // 미사일이 player 좌표의 50만큼 위에서부터 생성됨.
+                playerAttackList.add(playerAttack);
+            }
         }
     }
     //------------- 적 기체 생성 -----------------------------------------------
@@ -284,58 +290,60 @@ public class Game extends Thread{
     }
     //----------------------헤비 머신건(아이템) 생성-------------------------------------
     private void itemAppearProcess(){
-        if(item == null){
-            item = new Item(0,0);
+        if(item == null && !itemCollisionWithPlayer){
+            int randomPosX = (int) (Math.random() * (Main.SCREEN_WIDTH - 60+1));
+            item = new Item(randomPosX,0);
         }
     }
     //----------------------헤비 머신건(아이템) 움직임-----------------------------------
     private void itemMoveProcess(){
-        System.out.println("움직임시작.");
-        if(item.posX+item.width>=Main.SCREEN_WIDTH){ // 오른쪽 벽 부딪침
-            System.out.println("오른쪽 벽 부딪침");
-            movingRight=true;
-            movingLeft=false;
-            movingUnder=false;
-            movingDrop=false;
-        }
-        if(movingRight) {
-            item.rightMove();
-        }
-        if(item.posY+item.height>Main.SCREEN_HEIGHT){   // 아래쪽 벽 부딪침
-            System.out.println("아래쪽 벽 부딪침");
-            movingRight=false;
-            movingLeft=false;
-            movingUnder=true;
-            movingDrop=false;
-        }
-        if(movingUnder){
-            item.underMove();
-        }
-        if(item.posX<0){    // 왼쪽 벽 튕길 때
-            System.out.println("왼쪽 벽 부딪침");
-            movingRight = false;
-            movingLeft = true;
-            movingUnder = false;
-            movingDrop = false;
-        }
-        if(movingLeft) {
-            item.leftMove();
-        }
-        if(item.posY<=0){   // 위쪽 벽 튕길 때 및 아이템 생길 때
-            System.out.println("위쪽 벽 부딪침");
-            movingRight = false;
-            movingLeft = false;
-            movingUnder = false;
-            movingDrop = true;
-        }
-        if(movingDrop) {
-            item.dropMove();
+        if(item != null) {
+            if (item.posX + item.width >= Main.SCREEN_WIDTH) { // 오른쪽 벽 부딪침
+                movingRight = true;
+                movingLeft = false;
+                movingUnder = false;
+                movingDrop = false;
+            }
+            if (movingRight) {
+                item.rightMove();
+            }
+            if (item.posY + item.height > Main.SCREEN_HEIGHT) {   // 아래쪽 벽 부딪침
+                movingRight = false;
+                movingLeft = false;
+                movingUnder = true;
+                movingDrop = false;
+            }
+            if (movingUnder) {
+                item.underMove();
+            }
+            if (item.posX < 0) {    // 왼쪽 벽 튕길 때
+                movingRight = false;
+                movingLeft = true;
+                movingUnder = false;
+                movingDrop = false;
+            }
+            if (movingLeft) {
+                item.leftMove();
+            }
+            if (item.posY <= 0) {   // 위쪽 벽 튕길 때 및 아이템 생길 때
+                movingRight = false;
+                movingLeft = false;
+                movingUnder = false;
+                movingDrop = true;
+            }
+            if (movingDrop) {
+                item.dropMove();
+            }
+            if (Crash(item.posX + item.width / 2, item.posY + item.height / 2, playerX + playerWidth / 2, playerY + playerHeight / 2, item.width, item.height, playerWidth, playerHeight)) {
+                item = null;
+                itemCollisionWithPlayer = true;
+            }
         }
     }
     //--------------------- 충돌 판정 메서드 -------------------------------------------
     public boolean Crash(int x1, int y1, int x2, int y2, int w1, int h1, int w2, int h2){
         boolean check = false;
-        if (Math.abs((x1 + w1 / 2)  - (x2 + w2 / 2))  <  (w2 / 2 + w1 / 2)
+            if (Math.abs((x1 + w1 / 2)  - (x2 + w2 / 2))  <  (w2 / 2 + w1 / 2)
                 && Math.abs((y1 + h1 / 2)  - (y2 + h2 / 2))  <  (h2 / 2 + h1/ 2)){
             check = true;//위 값이 true면 check에 true를 전달합니다.
         }else {check = false;}
@@ -428,7 +436,6 @@ public class Game extends Thread{
     }
     public void itemDraw(Graphics g) {
         if (item != null && item.image != null) {
-            System.out.println("그리기 시작");
             g.drawImage(item.image, item.posX, item.posY, null);
         }
     }
