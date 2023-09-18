@@ -334,8 +334,10 @@ public class Game extends Thread{
             if (speedEnemy!=null && speedEnemy.posY + speedEnemy.height / 2 == 405) {
                 for (int i = 0; i < speedEnemyList.size(); i++) {
                     SpeedEnemy speedEnemy = speedEnemyList.get(i);
+                    System.out.println(speedEnemy);
                     for (int j = 0; j < 16; j++) {
                         speedEnemyAttack = new SpeedEnemyAttack(speedEnemy.posX + speedEnemy.width / 2, speedEnemy.posY + speedEnemy.height / 2, new ImageIcon("src/images/speedEnemy_bullet.png").getImage());
+                        System.out.println(speedEnemy);
                         speedEnemyAttackList.add(speedEnemyAttack);
                         System.out.println(speedEnemy+": "+speedEnemyAttack);
                     }

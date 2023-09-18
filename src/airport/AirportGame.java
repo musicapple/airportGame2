@@ -18,6 +18,8 @@ public class AirportGame extends JFrame {
     private Image backgroundScreen2 = new ImageIcon("src/images/background2.jpg").getImage();
     private Image backgroundScreen3 = new ImageIcon("src/images/background3.jpg").getImage();
     private Image backgroundScreen4 = new ImageIcon("src/images/background4.jpg").getImage();
+    private Image backgroundScreen5 = new ImageIcon("src/images/background5.jpg").getImage();
+    private Image backgroundScreen6 = new ImageIcon("src/images/background6.jpg").getImage();
 
     private Image loadingScreen = new ImageIcon("src/images/loading_screen.png").getImage();
 
@@ -62,8 +64,8 @@ public class AirportGame extends JFrame {
     // GUI 프로그램이 실행될 경우 JVM에 의해 자동으로 호출
     // Graphics 객체: 그림을 그리는 객체
     public void paint(Graphics g) {
-        if (backgroundY >= 3200) {  // 무한반복 테스트용
-            backgroundY = 2400;
+        if (backgroundY >= 4800) {  // 무한반복 테스트용
+            backgroundY = 4000;
         }
         bufferImage = createImage(Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT); // 이미지 반환
         screenGraphic = bufferImage.getGraphics(); // 이미지의 그래픽 반환
@@ -80,7 +82,9 @@ public class AirportGame extends JFrame {
             g.drawImage(backgroundScreen2,0,backgroundY-backgroundScreen1.getHeight(null),null);
             g.drawImage(backgroundScreen3,0,backgroundY-backgroundScreen1.getHeight(null)-backgroundScreen2.getHeight(null),null);
             g.drawImage(backgroundScreen4,0,backgroundY-backgroundScreen1.getHeight(null)-backgroundScreen2.getHeight(null)-backgroundScreen3.getHeight(null),null);
-            g.drawImage(backgroundScreen4,0,backgroundY-backgroundScreen1.getHeight(null)-backgroundScreen2.getHeight(null)-backgroundScreen3.getHeight(null)-backgroundScreen3.getHeight(null),null); // 무한반복 테스트용
+            g.drawImage(backgroundScreen5,0,backgroundY-backgroundScreen1.getHeight(null)-backgroundScreen2.getHeight(null)-backgroundScreen3.getHeight(null)-backgroundScreen4.getHeight(null),null);
+            g.drawImage(backgroundScreen6,0,backgroundY-backgroundScreen1.getHeight(null)-backgroundScreen2.getHeight(null)-backgroundScreen3.getHeight(null)-backgroundScreen4.getHeight(null)-backgroundScreen5.getHeight(null),null);
+            g.drawImage(backgroundScreen6,0,backgroundY-backgroundScreen1.getHeight(null)-backgroundScreen2.getHeight(null)-backgroundScreen3.getHeight(null)-backgroundScreen4.getHeight(null)-backgroundScreen5.getHeight(null)-backgroundScreen5.getHeight(null),null);// 무한반복 테스트용
 
             game.gameDraw(g);
         }

@@ -70,3 +70,9 @@ class SpeedEnemy extends Enemy {
         posY -= 10;  // 적기 아래에서 위로 이동
     }
 }
+class Boss extends Enemy {
+
+    public Boss(int hp, int posX, int posY, int width, int height, Image image) {
+        super(hp, posX, posY, width, height, image);
+    }
+}
