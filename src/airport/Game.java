@@ -2,6 +2,8 @@ package airport;
 
 import javax.swing.*;
 import java.awt.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.TimerTask;
 import java.util.Timer;
@@ -45,6 +47,12 @@ public class Game extends Thread{
     ArrayList<SecondEnemyAttack> secondEnemyAttackList = new ArrayList<>(); // 총알이 여러개 발사됨.
     private SecondEnemyAttack secondEnemyAttack;    // secondEnemy 총알
 
+    ArrayList<ThirdEnemyAttack> thirdEnemyAttackList = new ArrayList<>();   // 총알이 여러개 발사됨.
+    private ThirdEnemyAttack thirdEnemyAttack;
+
+    ArrayList<SpeedEnemyAttack> speedEnemyAttackList = new ArrayList<>();   // 총알이 여러개 발사됨.
+    private SpeedEnemyAttack speedEnemyAttack;  // speedEnemy 총알
+
 //--------------- 적 기체 선언 ---------------------------------------------------------
     ArrayList<FirstEnemy> firstEnemyList = new ArrayList<>(); // firstEnemy가 여러번 등장함.
     private FirstEnemy firstEnemy; // 처음 등장하는 적기체
@@ -85,8 +93,10 @@ public class Game extends Thread{
                     secondEnemyAttackProcess();
                     thirdEnemyAppearProcess();
                     thirdEnemyMoveProcess();
+                    thirdEnemyAttackProcess();
                     speedEnemyAppearProcess();
                     speedEnemyMoveProcess();
+                    speedEnemyAttackProcess();
 
                     endTime=System.currentTimeMillis();
                     cnt++;  // 0.03초마다 증가
@@ -209,6 +219,7 @@ public class Game extends Thread{
         }
     }
     public void speedEnemyMoveProcess() {   // 생성된 모든 speedEnemy 적 기체 이동
+
         for(int i =0; i<speedEnemyList.size(); i++) {
             speedEnemyList.get(i).move();
             if(speedEnemyList.get(i).posY < 0-speedEnemyList.get(i).height) {
@@ -232,10 +243,13 @@ public class Game extends Thread{
             for(int j=0; j<playerAttackList.size(); j++) {
                 playerAttack = playerAttackList.get(j);
             if(Crash(playerAttack.x+playerAttack.width/2,playerAttack.y+playerAttack.height/2, firstEnemy.posX+firstEnemy.width/2, firstEnemy.posY+firstEnemy.height/2,playerAttack.width,playerAttack.height, firstEnemy.width,firstEnemy.height)) {
-                firstEnemyList.remove(i);   // firstEnemy 제거
+                firstEnemy.hp = firstEnemy.hp - 50; // 적 격추시 hp 차감
                 playerAttackList.remove(j); // 총알 제거
-                boomList.add(new Boom(firstEnemy.posX, firstEnemy.posY, 80, 80));
-            }
+                if(firstEnemy.hp <= 0) {    // 적 hp 0이하로 떨어지면 if문 true
+                    firstEnemyList.remove(i);   // firstEnemy 제거
+                    boomList.add(new Boom(firstEnemy.posX, firstEnemy.posY, 80, 80));
+                }
+                }
             }
         }
         for(int i=0; i<secondEnemyList.size(); i++) {    // player 총알과 secondEnemy 충돌시 총알과 secondEnemy 제거
@@ -243,9 +257,12 @@ public class Game extends Thread{
             for(int j=0; j<playerAttackList.size(); j++) {
                 playerAttack = playerAttackList.get(j);
                 if(Crash(playerAttack.x+playerAttack.width/2,playerAttack.y+playerAttack.height/2,secondEnemy.posX+secondEnemy.width/2, secondEnemy.posY+secondEnemy.height/2, playerAttack.width, playerAttack.height, secondEnemy.width, secondEnemy.height)){
-                    secondEnemyList.remove(i);  // secondEnemy 제거
+                    secondEnemy.hp = secondEnemy.hp - 50;   // 적 격추시 hp 차감
                     playerAttackList.remove(j); // 총알 제거
-                    boomList.add(new Boom(secondEnemy.posX, secondEnemy.posY, 80, 80));
+                    if(secondEnemy.hp <= 0) {   // 적 hp 0이하로 떨어지면 if문 true
+                        secondEnemyList.remove(i);  // secondEnemy 제거
+                        boomList.add(new Boom(secondEnemy.posX, secondEnemy.posY, 80, 80));
+                    }
                 }
             }
         }
@@ -254,9 +271,12 @@ public class Game extends Thread{
             for(int j=0; j<playerAttackList.size(); j++) {
                 playerAttack = playerAttackList.get(j);
                 if(Crash(playerAttack.x+playerAttack.width/2, playerAttack.y+ playerAttack.height/2, thirdEnemy.posX+thirdEnemy.width/2, thirdEnemy.posY+thirdEnemy.height/2, playerAttack.width,playerAttack.height, thirdEnemy.width, thirdEnemy.height)){
-                    thirdEnemyList.remove(i);
-                    playerAttackList.remove(j);
-                    boomList.add(new Boom(thirdEnemy.posX, thirdEnemy.posY, 80, 80));
+                    thirdEnemy.hp = thirdEnemy.hp - 50; // 적 격추시 hp 차감
+                    playerAttackList.remove(j); // 총알 제거
+                    if(thirdEnemy.hp <= 0) {    // 적 hp 0이하로 떨어지면 if문 true
+                        thirdEnemyList.remove(i);   // thirdEnemy 제거
+                        boomList.add(new Boom(thirdEnemy.posX, thirdEnemy.posY, 80, 80));
+                    }
                 }
             }
         }
@@ -266,28 +286,73 @@ public class Game extends Thread{
         for(int i=0; i<firstEnemyList.size(); i++) {
             firstEnemy = firstEnemyList.get(i);
             if(cnt % 20 == 0) { // 0, 0.6, 1.2, 1.8, ...초마다 총알 생성
-                firstEnemyAttack = new FirstEnemyAttack(firstEnemy.posX, firstEnemy.posY, 10, 10, new ImageIcon("src/images/firstEnemy_bullet.png").getImage());
+                firstEnemyAttack = new FirstEnemyAttack(firstEnemy.posX, firstEnemy.posY, new ImageIcon("src/images/firstEnemy_bullet.png").getImage());
                 firstEnemyAttackList.add(firstEnemyAttack);
             }
         }
         for(int i=0; i<firstEnemyAttackList.size(); i++) {
             firstEnemyAttack = firstEnemyAttackList.get(i);
             firstEnemyAttack.fire();
+            if(firstEnemyAttack.posY > Main.SCREEN_HEIGHT) {    // firstEnemy의 총알이 화면 맨밑으로 빠져나가면 메모리에서 제거됨
+                firstEnemyAttackList.remove(i);
+            }
         }
     }
     private void secondEnemyAttackProcess() {
         for(int i=0; i<secondEnemyList.size(); i++){    // secondEnemy 총알 생성
             secondEnemy = secondEnemyList.get(i);
             if(cnt % 20 == 0) {
-                secondEnemyAttack = new SecondEnemyAttack(secondEnemy.posX,secondEnemy.posY,10,10,new ImageIcon("src/images/secondEnemy_bullet.png").getImage());
+                secondEnemyAttack = new SecondEnemyAttack(secondEnemy.posX,secondEnemy.posY,new ImageIcon("src/images/secondEnemy_bullet.png").getImage());
                 secondEnemyAttackList.add(secondEnemyAttack);
             }
         }
         for(int i=0; i<secondEnemyAttackList.size(); i++) {
             secondEnemyAttack=secondEnemyAttackList.get(i);
             secondEnemyAttack.fire();
+            if(secondEnemyAttack.posY > Main.SCREEN_HEIGHT){    // secondEnemy의 총알이 화면 맨밑으로 빠져나가면 메모리에서 제거됨
+                secondEnemyAttackList.remove(i);
+            }
         }
     }
+    private void thirdEnemyAttackProcess() {
+        for(int i=0; i<thirdEnemyList.size(); i++) {
+            thirdEnemy = thirdEnemyList.get(i);
+            if(cnt % 50 == 0) { // 1.5, 3.0, 4.5, ....
+                thirdEnemyAttack = new ThirdEnemyAttack(thirdEnemy.posX+thirdEnemy.width/2,thirdEnemy.posY+thirdEnemy.height,new ImageIcon("src/images/thirdEnemy_bullet.png").getImage());
+                thirdEnemyAttackList.add(thirdEnemyAttack);
+            }
+        }
+        for(int i=0; i<thirdEnemyAttackList.size(); i++) {
+            thirdEnemyAttack = thirdEnemyAttackList.get(i);
+            thirdEnemyAttack.fire();
+            if(thirdEnemyAttack.posY > Main.SCREEN_HEIGHT) {  // thirdEnemy의 총알이 화면 맨밑으로 빠져나가면 메모리에서 제거됨
+                thirdEnemyAttackList.remove(i);
+            }
+        }
+    }
+        private void speedEnemyAttackProcess() {
+            if (speedEnemy!=null && speedEnemy.posY + speedEnemy.height / 2 == 405) {
+                for (int i = 0; i < speedEnemyList.size(); i++) {
+                    SpeedEnemy speedEnemy = speedEnemyList.get(i);
+                    for (int j = 0; j < 16; j++) {
+                        speedEnemyAttack = new SpeedEnemyAttack(speedEnemy.posX + speedEnemy.width / 2, speedEnemy.posY + speedEnemy.height / 2, new ImageIcon("src/images/speedEnemy_bullet.png").getImage());
+                        speedEnemyAttackList.add(speedEnemyAttack);
+                        System.out.println(speedEnemy+": "+speedEnemyAttack);
+                    }
+                }
+                }
+                for (int k = 0; k < speedEnemyAttackList.size(); k++) {
+                    speedEnemyAttack = speedEnemyAttackList.get(k);
+                    int methodIndex = k % 16;   // 0부터 15까지의 값을 반복
+                    String methodName = "fire" + methodIndex;   // SpeedEnemyAttack 클래스에서 fire1~fire16 메서드 이름과 같게 만들어주기
+                    try {
+                        Method fireMethod = SpeedEnemyAttack.class.getMethod(methodName);
+                        fireMethod.invoke(speedEnemyAttack);  // speedEnemy 객체에서 해당 메서드를 호출
+                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
     //----------------------헤비 머신건(아이템) 생성-------------------------------------
     private void itemAppearProcess(){
         if(item == null && !itemCollisionWithPlayer){
@@ -361,9 +426,12 @@ public class Game extends Thread{
         speedEnemyDraw(g);
         firstEnemyAttackDraw(g);
         secondEnemyAttackDraw(g);
+        thirdEnemyAttackDraw(g);
+        speedEnemyAttackDraw(g);
         boomDraw(g);
         itemDraw(g);
     }
+
     public void playerDraw(Graphics g) {
         g.drawImage(player,playerX,playerY,playerWidth, playerHeight,null);
         for(int i = 0; i < playerAttackList.size(); i++) {
@@ -407,10 +475,21 @@ public class Game extends Thread{
             g.drawImage(secondEnemyAttack.image,secondEnemyAttack.posX,secondEnemyAttack.posY,secondEnemyAttack.width,secondEnemyAttack.height,null);
         }
     }
+    public void thirdEnemyAttackDraw(Graphics g) {
+        for(int i=0; i<thirdEnemyAttackList.size(); i++) {
+            thirdEnemyAttack = thirdEnemyAttackList.get(i);
+            g.drawImage(thirdEnemyAttack.image, thirdEnemyAttack.posX, thirdEnemyAttack.posY, thirdEnemyAttack.width, thirdEnemyAttack.height, null);
+        }
+    }
+    public void speedEnemyAttackDraw(Graphics g) {
+        for(int i=0;i<speedEnemyAttackList.size(); i++) {
+            speedEnemyAttack = speedEnemyAttackList.get(i);
+            g.drawImage(speedEnemyAttack.image, speedEnemyAttack.posX,speedEnemyAttack.posY, speedEnemyAttack.width, speedEnemyAttack.height, null);
+        }
+    }
     public void boomDraw(Graphics g) {  // 적기체 연쇄폭발 이미지
         for (int i = 0; i < boomList.size(); i++) {
             boom = boomList.get(i);
-            //System.out.println(boom.cnt);
             if (boom.cnt <= 8) {
                 g.drawImage(boom.image1, boom.posX, boom.posY, null);
             } else if (boom.cnt <= 32) {

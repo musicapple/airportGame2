@@ -3,7 +3,7 @@ package airport;
 import java.awt.*;
 
 public class Enemy {    // 적기의 공통되는 요소를 가진 class
-    private int hp;
+    protected int hp;
     protected int posX;
     protected int posY;
     protected int width;
