@@ -19,6 +19,7 @@ public class Game extends Thread{
     private int secondEnemyDrawCount = 0;   // secondEnemy 적기 그려지는 횟수
     private int thirdEnemyDrawCount = 0;    // thirdEnemy 적기 그려지는 횟수
     private int speedEnemyDrawCount = 0;    // speedEnemyDrawCount 적기 그려지는 횟수
+    private int bossDrawCount = 0;          // boss 적기 그려지는 횟수
     private int GameScreenCount = 0;        // GameScreen,GameScreenRed 구별하기위해 카운트
 
     private Image player = new ImageIcon("src/images/player.png").getImage();  // player 이미지 저장
@@ -53,6 +54,8 @@ public class Game extends Thread{
     ArrayList<SpeedEnemyAttack> speedEnemyAttackList = new ArrayList<>();   // 총알이 여러개 발사됨.
     private SpeedEnemyAttack speedEnemyAttack;  // speedEnemy 총알
 
+    ArrayList<BossAttack> bossAttackList = new ArrayList<>();
+    private BossAttack bossAttack;
 //--------------- 적 기체 선언 ---------------------------------------------------------
     ArrayList<FirstEnemy> firstEnemyList = new ArrayList<>(); // firstEnemy가 여러번 등장함.
     private FirstEnemy firstEnemy; // 처음 등장하는 적기체
@@ -65,6 +68,8 @@ public class Game extends Thread{
 
     ArrayList<SpeedEnemy> speedEnemyList = new ArrayList<>();   // speedEnemy가 여러번 등장함.
     private SpeedEnemy speedEnemy;  // 빠르게 등장해서 요격하고 사라지는 적기체
+
+    private Boss boss; // 보스기체
 //-------------------폭발 선언--------------------------------------------------------------
     ArrayList<Boom> boomList = new ArrayList<>(); // 폭발을 여러번함.
     private Boom boom; // 적 격추했을 때 발생하는 폭발 이미지
@@ -97,6 +102,8 @@ public class Game extends Thread{
                     speedEnemyAppearProcess();
                     speedEnemyMoveProcess();
                     speedEnemyAttackProcess();
+                    bossAppearProcess();
+                    bossMoveProcess();
 
                     endTime=System.currentTimeMillis();
                     cnt++;  // 0.03초마다 증가
@@ -129,7 +136,7 @@ public class Game extends Thread{
     private void firstEnemyAppearProcess() {
         if(firstEnemyDrawCount < 10) {  // 적기 10번 등장
             if(endTime - startTime >= 10000 * firstEnemyDrawCount) {    // 0초에 첫번째 기체 등장 10초후 두번째 기체 등장
-                firstEnemy = new FirstEnemy(50, 0, 250, 50, 50, new ImageIcon("src/images/firstEnemy.png").getImage());
+                firstEnemy = new FirstEnemy(50, 0, 250, new ImageIcon("src/images/firstEnemy.png").getImage());
                 firstEnemyList.add(firstEnemy);
                 firstEnemyDrawCount++;
             }
@@ -146,7 +153,7 @@ public class Game extends Thread{
     private void secondEnemyAppearProcess() {  // secondEnemy 적 기체 생성
         if(secondEnemyDrawCount < 10) { // 적기 10번 등장
             if(endTime - startTime >= 10000*secondEnemyDrawCount+1000) { // 1초에 첫번째 기체 등장 11초후 두번째 기체 등장
-                secondEnemy = new SecondEnemy(50, Main.SCREEN_WIDTH, 50, 50, 50, new ImageIcon("src/images/secondEnemy.png").getImage());
+                secondEnemy = new SecondEnemy(50, Main.SCREEN_WIDTH, 50, new ImageIcon("src/images/secondEnemy.png").getImage());
                 secondEnemyList.add(secondEnemy);
                 secondEnemyDrawCount++;
             }
@@ -165,9 +172,9 @@ public class Game extends Thread{
             if(endTime - startTime >= 10000*thirdEnemyDrawCount +1000 ) {   // 1초에 첫번째 기체 등장 11초 후 두번째 기체 등장
                 for (int i = 0; i < 6; i++) {   // 한번 등장할 때 6기체 등장
                     if(thirdEnemyDrawCount % 2 ==0) {
-                        thirdEnemy = new ThirdEnemy(50, 100 + i * 100, -i * 50, 50, 50, new ImageIcon("src/images/thirdEnemy.png").getImage());
+                        thirdEnemy = new ThirdEnemy(50, 100 + i * 100, -i * 50,new ImageIcon("src/images/thirdEnemy.png").getImage());
                     } else {
-                        thirdEnemy = new ThirdEnemy(50, Main.SCREEN_WIDTH-i*100-200,-i*50, 50, 50, new ImageIcon("src/images/thirdEnemy.png").getImage());
+                        thirdEnemy = new ThirdEnemy(50, Main.SCREEN_WIDTH-i*100-200,-i*50, new ImageIcon("src/images/thirdEnemy.png").getImage());
                     }
                     thirdEnemyList.add(thirdEnemy);
                 }
@@ -208,9 +215,9 @@ public class Game extends Thread{
             if (endTime - startTime > 10000 * (speedEnemyDrawCount + 1) + 1000) {    // 11초, 21초, ..., 적기체 생성
                 for (int i = 0; i < 2; i++) {
                     if (i % 2 == 0) {
-                        speedEnemy = new SpeedEnemy(50, 150, Main.SCREEN_HEIGHT, 130, 130, new ImageIcon("src/images/speedEnemy.png").getImage());
+                        speedEnemy = new SpeedEnemy(50, 150, Main.SCREEN_HEIGHT, new ImageIcon("src/images/speedEnemy.png").getImage());
                     } else {
-                        speedEnemy = new SpeedEnemy(50, Main.SCREEN_WIDTH - 250, Main.SCREEN_HEIGHT, 130, 130, new ImageIcon("src/images/speedEnemy.png").getImage());
+                        speedEnemy = new SpeedEnemy(50, Main.SCREEN_WIDTH - 250, Main.SCREEN_HEIGHT, new ImageIcon("src/images/speedEnemy.png").getImage());
                     }
                     speedEnemyList.add(speedEnemy);
                 }
@@ -225,6 +232,21 @@ public class Game extends Thread{
             if(speedEnemyList.get(i).posY < 0-speedEnemyList.get(i).height) {
                 speedEnemyList.remove(i);
                 isGameScreenRed = false;    // speedEnemy가 화면 밖으로 나가면 GameScreen 정상으로
+            }
+        }
+    }
+    public void bossAppearProcess() {
+        if(bossDrawCount < 1) {
+            if(endTime - startTime >= 4000 ) {   // 1초에 첫번째 기체 등장 11초 후 두번째 기체 등장
+                boss = new Boss(100,Main.SCREEN_WIDTH/2-325,-250, new ImageIcon("src/images/boss.png").getImage());
+                bossDrawCount++;
+            }
+        }
+    }
+    public void bossMoveProcess() {
+        if (boss != null) {
+            if (boss.posY < -1) {
+                boss.move();
             }
         }
     }
@@ -330,31 +352,47 @@ public class Game extends Thread{
             }
         }
     }
-        private void speedEnemyAttackProcess() {
-            if (speedEnemy!=null && speedEnemy.posY + speedEnemy.height / 2 == 405) {
-                for (int i = 0; i < speedEnemyList.size(); i++) {
-                    SpeedEnemy speedEnemy = speedEnemyList.get(i);
+    private void speedEnemyAttackProcess() {
+        if (speedEnemy!=null && speedEnemy.posY + speedEnemy.height / 2 == 405) {
+            for (int i = 0; i < speedEnemyList.size(); i++) {
+                SpeedEnemy speedEnemy = speedEnemyList.get(i);
+                System.out.println(speedEnemy);
+                for (int j = 0; j < 16; j++) {
+                    speedEnemyAttack = new SpeedEnemyAttack(speedEnemy.posX + speedEnemy.width / 2, speedEnemy.posY + speedEnemy.height / 2, new ImageIcon("src/images/speedEnemy_bullet.png").getImage());
                     System.out.println(speedEnemy);
-                    for (int j = 0; j < 16; j++) {
-                        speedEnemyAttack = new SpeedEnemyAttack(speedEnemy.posX + speedEnemy.width / 2, speedEnemy.posY + speedEnemy.height / 2, new ImageIcon("src/images/speedEnemy_bullet.png").getImage());
-                        System.out.println(speedEnemy);
-                        speedEnemyAttackList.add(speedEnemyAttack);
-                        System.out.println(speedEnemy+": "+speedEnemyAttack);
-                    }
-                }
-                }
-                for (int k = 0; k < speedEnemyAttackList.size(); k++) {
-                    speedEnemyAttack = speedEnemyAttackList.get(k);
-                    int methodIndex = k % 16;   // 0부터 15까지의 값을 반복
-                    String methodName = "fire" + methodIndex;   // SpeedEnemyAttack 클래스에서 fire1~fire16 메서드 이름과 같게 만들어주기
-                    try {
-                        Method fireMethod = SpeedEnemyAttack.class.getMethod(methodName);
-                        fireMethod.invoke(speedEnemyAttack);  // speedEnemy 객체에서 해당 메서드를 호출
-                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                        e.printStackTrace();
-                    }
+                    speedEnemyAttackList.add(speedEnemyAttack);
+                    System.out.println(speedEnemy+": "+speedEnemyAttack);
                 }
             }
+        }
+        for (int k = 0; k < speedEnemyAttackList.size(); k++) {
+            speedEnemyAttack = speedEnemyAttackList.get(k);
+            int methodIndex = k % 16;   // 0부터 15까지의 값을 반복
+            String methodName = "fire" + methodIndex;   // SpeedEnemyAttack 클래스에서 fire1~fire16 메서드 이름과 같게 만들어주기
+            try {
+                Method fireMethod = SpeedEnemyAttack.class.getMethod(methodName);
+                fireMethod.invoke(speedEnemyAttack);  // speedEnemy 객체에서 해당 메서드를 호출
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    private void bossAttackProcess() {
+        for (int i = 0; i < 9; i++) {
+            bossAttack = new BossAttack(10, (Main.SCREEN_WIDTH + boss.width) / 2, boss.height, new ImageIcon("src/images/boss_bullet").getImage());
+            bossAttackList.add(bossAttack);
+        }
+        for(int i=0; i<9; i++) {
+            bossAttack = bossAttackList.get(i);
+            String methodName = "fire" + i;
+            try {
+                Method fireMethod = BossAttack.class.getMethod(methodName);
+                fireMethod.invoke(bossAttack);
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e)  {
+                e.printStackTrace();
+            }
+        }
+    }
     //----------------------헤비 머신건(아이템) 생성-------------------------------------
     private void itemAppearProcess(){
         if(item == null && !itemCollisionWithPlayer){
@@ -421,6 +459,7 @@ public class Game extends Thread{
         if(isGameScreenRed) {   // speedEnemy가 등장할 때 배경화면 색 변하기
             g.drawImage(gameScreenRed,0,0,null);
         }
+        bossDraw(g);    // boss를 맨 먼저 그려야 다른 객체들이 겹쳐졌을때 (다른 객체가)무시되지않음.
         playerDraw(g);
         firstEnemyDraw(g);
         secondEnemyDraw(g);
@@ -463,6 +502,13 @@ public class Game extends Thread{
         for(int i= 0 ; i<speedEnemyList.size(); i++) {
             speedEnemy = speedEnemyList.get(i);
             g.drawImage(speedEnemy.image,speedEnemy.posX,speedEnemy.posY,speedEnemy.width,speedEnemy.height,null);
+        }
+    }
+    public void bossDraw(Graphics g) {
+        if (boss != null) {
+            if (boss.image != null) {
+                g.drawImage(boss.image, boss.posX, boss.posY, boss.width, boss.height, null);
+            }
         }
     }
     public void firstEnemyAttackDraw(Graphics g) {

@@ -11,12 +11,12 @@ public class Enemy {    // 적기의 공통되는 요소를 가진 class
     protected Image image;
     protected int cnt=0;
 
-    public Enemy(int hp,int posX,int posY,int width,int height,Image image) {
+    public Enemy(int hp,int posX,int posY, Image image) {
         this.hp = hp;
         this.posX = posX;
         this.posY = posY;
-        this.width = width;    // 적기체 너비
-        this.height = height;   // 적기체 높이
+        this.width = image.getWidth(null);    // 적기체 너비
+        this.height = image.getHeight(null);   // 적기체 높이
         this.image = image;
     }
     public void move() {}
@@ -27,8 +27,8 @@ public class Enemy {    // 적기의 공통되는 요소를 가진 class
 
 class FirstEnemy extends Enemy {
 
-    public FirstEnemy(int hp,int posX,int posY,int width,int height,Image image) {
-        super(hp,posX,posY,width,height,image);
+    public FirstEnemy(int hp,int posX,int posY,Image image) {
+        super(hp,posX,posY,image);
     }
 
     @Override
@@ -39,8 +39,8 @@ class FirstEnemy extends Enemy {
 }
 class SecondEnemy extends Enemy {
 
-    public SecondEnemy(int hp,int posX, int posY,int width,int height, Image image){
-        super(hp,posX,posY,width,height,image);
+    public SecondEnemy(int hp,int posX, int posY, Image image){
+        super(hp,posX,posY,image);
     }
 
     @Override
@@ -51,8 +51,8 @@ class SecondEnemy extends Enemy {
 }
 class ThirdEnemy extends Enemy {
 
-    public ThirdEnemy(int hp,int posX, int posY, int width, int height, Image image) {
-        super(hp,posX,posY,width,height,image);
+    public ThirdEnemy(int hp,int posX, int posY,Image image) {
+        super(hp,posX,posY,image);
     }
 
     @Override
@@ -62,8 +62,8 @@ class ThirdEnemy extends Enemy {
 }
 class SpeedEnemy extends Enemy {
 
-    public SpeedEnemy(int hp,int posX,int posY,int width,int height,Image image) {
-        super(hp,posX,posY,width,height,image);
+    public SpeedEnemy(int hp,int posX,int posY,Image image) {
+        super(hp,posX,posY,image);
     }
     @Override
     public void move() {
@@ -72,7 +72,10 @@ class SpeedEnemy extends Enemy {
 }
 class Boss extends Enemy {
 
-    public Boss(int hp, int posX, int posY, int width, int height, Image image) {
-        super(hp, posX, posY, width, height, image);
+    public Boss(int hp, int posX, int posY, Image image) {
+        super(hp, posX, posY, image);
+    }
+    public void move() {
+        posY += 3;  // 적기 위에서 아래로 이동
     }
 }

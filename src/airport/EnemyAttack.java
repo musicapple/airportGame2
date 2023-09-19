@@ -120,3 +120,9 @@ class SpeedEnemyAttack extends EnemyAttack {
         posY += 5;
     }
 }
+class BossAttack extends EnemyAttack {
+
+    public BossAttack(int attack, int posX, int posY, Image image) {
+        super(attack, posX, posY, image);
+    }
+}
