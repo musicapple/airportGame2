@@ -125,4 +125,39 @@ class BossAttack extends EnemyAttack {
     public BossAttack(int attack, int posX, int posY, Image image) {
         super(attack, posX, posY, image);
     }
+    public void fire0() {
+        posX -= 8;
+        posY += 6;
+    }
+    public void fire1() {
+        posX -= 6;
+        posY += 6;
+    }
+    public void fire2() {
+        posX -= 4;
+        posY += 6;
+    }
+    public void fire3() {
+        posX -= 2;
+        posY += 6;
+    }
+    public void fire4() {   // 센터
+        posY += 6;
+    }
+    public void fire5() {
+        posX += 2;
+        posY += 6;
+    }
+    public void fire6() {
+        posX += 4;
+        posY += 6;
+    }
+    public void fire7() {
+        posX += 6;
+        posY += 6;
+    }
+    public void fire8() {
+        posX += 8;
+        posY += 6;
+    }
 }

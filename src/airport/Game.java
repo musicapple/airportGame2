@@ -104,6 +104,7 @@ public class Game extends Thread{
                     speedEnemyAttackProcess();
                     bossAppearProcess();
                     bossMoveProcess();
+                    bossAttackProcess();
 
                     endTime=System.currentTimeMillis();
                     cnt++;  // 0.03초마다 증가
@@ -212,7 +213,7 @@ public class Game extends Thread{
                 loadingTimer.scheduleAtFixedRate(loadingTask,800,800);  // isGameScreenRed가 true가 된 후 0.8초 후 run()실행. 0.8초마다 반복실행.
                 GameScreenCount++;
             }*/
-            if (endTime - startTime > 10000 * (speedEnemyDrawCount + 1) + 1000) {    // 11초, 21초, ..., 적기체 생성
+            if (endTime - startTime > 4000 * (speedEnemyDrawCount + 1) + 1000) {    // 11초, 21초, ..., 적기체 생성
                 for (int i = 0; i < 2; i++) {
                     if (i % 2 == 0) {
                         speedEnemy = new SpeedEnemy(50, 150, Main.SCREEN_HEIGHT, new ImageIcon("src/images/speedEnemy.png").getImage());
@@ -233,6 +234,8 @@ public class Game extends Thread{
                 speedEnemyList.remove(i);
                 isGameScreenRed = false;    // speedEnemy가 화면 밖으로 나가면 GameScreen 정상으로
             }
+            System.out.println(speedEnemy.posY + speedEnemy.height/2);
+
         }
     }
     public void bossAppearProcess() {
@@ -353,7 +356,7 @@ public class Game extends Thread{
         }
     }
     private void speedEnemyAttackProcess() {
-        if (speedEnemy!=null && speedEnemy.posY + speedEnemy.height / 2 == 405) {
+        if (speedEnemy!=null && speedEnemy.posY + speedEnemy.height / 2 == 404) {
             for (int i = 0; i < speedEnemyList.size(); i++) {
                 SpeedEnemy speedEnemy = speedEnemyList.get(i);
                 System.out.println(speedEnemy);
@@ -378,13 +381,16 @@ public class Game extends Thread{
         }
     }
     private void bossAttackProcess() {
-        for (int i = 0; i < 9; i++) {
-            bossAttack = new BossAttack(10, (Main.SCREEN_WIDTH + boss.width) / 2, boss.height, new ImageIcon("src/images/boss_bullet").getImage());
-            bossAttackList.add(bossAttack);
+        if(boss!=null && cnt % 50 ==0) {
+            for (int i = 0; i < 9; i++) {
+                bossAttack = new BossAttack(10, (Main.SCREEN_WIDTH - 10)/2, boss.height, new ImageIcon("src/images/boss_bullet.png").getImage());
+                bossAttackList.add(bossAttack);
+            }
         }
-        for(int i=0; i<9; i++) {
+        for(int i=0; i<bossAttackList.size(); i++) {
             bossAttack = bossAttackList.get(i);
-            String methodName = "fire" + i;
+            int methodIndex = i % 9;
+            String methodName = "fire" + methodIndex;
             try {
                 Method fireMethod = BossAttack.class.getMethod(methodName);
                 fireMethod.invoke(bossAttack);
@@ -469,6 +475,7 @@ public class Game extends Thread{
         secondEnemyAttackDraw(g);
         thirdEnemyAttackDraw(g);
         speedEnemyAttackDraw(g);
+        bossAttackDraw(g);
         boomDraw(g);
         itemDraw(g);
     }
@@ -533,6 +540,12 @@ public class Game extends Thread{
         for(int i=0;i<speedEnemyAttackList.size(); i++) {
             speedEnemyAttack = speedEnemyAttackList.get(i);
             g.drawImage(speedEnemyAttack.image, speedEnemyAttack.posX,speedEnemyAttack.posY, speedEnemyAttack.width, speedEnemyAttack.height, null);
+        }
+    }
+    public void bossAttackDraw(Graphics g) {
+        for(int i=0; i<bossAttackList.size(); i++) {
+            bossAttack = bossAttackList.get(i);
+            g.drawImage(bossAttack.image, bossAttack.posX, bossAttack.posY,bossAttack.width, bossAttack.height, null);
         }
     }
     public void boomDraw(Graphics g) {  // 적기체 연쇄폭발 이미지
