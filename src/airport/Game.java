@@ -234,14 +234,12 @@ public class Game extends Thread{
                 speedEnemyList.remove(i);
                 isGameScreenRed = false;    // speedEnemy가 화면 밖으로 나가면 GameScreen 정상으로
             }
-            System.out.println(speedEnemy.posY + speedEnemy.height/2);
-
         }
     }
     public void bossAppearProcess() {
         if(bossDrawCount < 1) {
             if(endTime - startTime >= 4000 ) {   // 1초에 첫번째 기체 등장 11초 후 두번째 기체 등장
-                boss = new Boss(100,Main.SCREEN_WIDTH/2-325,-250, new ImageIcon("src/images/boss.png").getImage());
+                boss = new Boss(200,Main.SCREEN_WIDTH/2-319,-250, new ImageIcon("src/images/boss.png").getImage());
                 bossDrawCount++;
             }
         }
@@ -255,11 +253,11 @@ public class Game extends Thread{
     }
     //---------------- 적기체 공격 메서드 --------------------------------------------
     private void playerAttackProcess() {    // 공격을 처리해주는 메서드
-        for(int i = 0; i < playerAttackList.size(); i++) {
+        for (int i = 0; i < playerAttackList.size(); i++) {
             playerAttack = playerAttackList.get(i);
             playerAttack.fire();
 
-            if(playerAttackList.get(i).y < 0-playerAttackList.get(i).height) {  // player 총알 화면에서 나갈시 제거하여 메모리 재활용
+            if (playerAttackList.get(i).y < 0 - playerAttackList.get(i).height) {  // player 총알 화면에서 나갈시 제거하여 메모리 재활용
                 playerAttackList.remove(i);
             }
         }
@@ -267,7 +265,7 @@ public class Game extends Thread{
             firstEnemy = firstEnemyList.get(i);
             for(int j=0; j<playerAttackList.size(); j++) {
                 playerAttack = playerAttackList.get(j);
-            if(Crash(playerAttack.x+playerAttack.width/2,playerAttack.y+playerAttack.height/2, firstEnemy.posX+firstEnemy.width/2, firstEnemy.posY+firstEnemy.height/2,playerAttack.width,playerAttack.height, firstEnemy.width,firstEnemy.height)) {
+            if(Crash(playerAttack.x,playerAttack.y, firstEnemy.posX, firstEnemy.posY,playerAttack.width,playerAttack.height, firstEnemy.width,firstEnemy.height)) {
                 firstEnemy.hp = firstEnemy.hp - 50; // 적 격추시 hp 차감
                 playerAttackList.remove(j); // 총알 제거
                 if(firstEnemy.hp <= 0) {    // 적 hp 0이하로 떨어지면 if문 true
@@ -281,7 +279,7 @@ public class Game extends Thread{
             secondEnemy = secondEnemyList.get(i);
             for(int j=0; j<playerAttackList.size(); j++) {
                 playerAttack = playerAttackList.get(j);
-                if(Crash(playerAttack.x+playerAttack.width/2,playerAttack.y+playerAttack.height/2,secondEnemy.posX+secondEnemy.width/2, secondEnemy.posY+secondEnemy.height/2, playerAttack.width, playerAttack.height, secondEnemy.width, secondEnemy.height)){
+                if(Crash(playerAttack.x,playerAttack.y,secondEnemy.posX, secondEnemy.posY, playerAttack.width, playerAttack.height, secondEnemy.width, secondEnemy.height)){
                     secondEnemy.hp = secondEnemy.hp - 50;   // 적 격추시 hp 차감
                     playerAttackList.remove(j); // 총알 제거
                     if(secondEnemy.hp <= 0) {   // 적 hp 0이하로 떨어지면 if문 true
@@ -295,12 +293,24 @@ public class Game extends Thread{
             thirdEnemy = thirdEnemyList.get(i);
             for(int j=0; j<playerAttackList.size(); j++) {
                 playerAttack = playerAttackList.get(j);
-                if(Crash(playerAttack.x+playerAttack.width/2, playerAttack.y+ playerAttack.height/2, thirdEnemy.posX+thirdEnemy.width/2, thirdEnemy.posY+thirdEnemy.height/2, playerAttack.width,playerAttack.height, thirdEnemy.width, thirdEnemy.height)){
+                if(Crash(playerAttack.x, playerAttack.y, thirdEnemy.posX, thirdEnemy.posY, playerAttack.width,playerAttack.height, thirdEnemy.width, thirdEnemy.height)){
                     thirdEnemy.hp = thirdEnemy.hp - 50; // 적 격추시 hp 차감
                     playerAttackList.remove(j); // 총알 제거
                     if(thirdEnemy.hp <= 0) {    // 적 hp 0이하로 떨어지면 if문 true
                         thirdEnemyList.remove(i);   // thirdEnemy 제거
                         boomList.add(new Boom(thirdEnemy.posX, thirdEnemy.posY, 80, 80));
+                    }
+                }
+            }
+        }
+        if(boss != null) {
+            for (int i = 0; i < playerAttackList.size(); i++) {
+                playerAttack = playerAttackList.get(i);
+                if (boss != null && Crash(playerAttack.x, playerAttack.y, boss.posX, boss.posY, playerAttack.width, playerAttack.height, boss.width, boss.height)) {
+                    boss.hp = boss.hp - 50;  // boss 피격시 hp 50 차감
+                    playerAttackList.remove(i); // 총알 제거
+                    if (boss.hp <= 0) {
+                        boss = null;
                     }
                 }
             }
@@ -359,12 +369,9 @@ public class Game extends Thread{
         if (speedEnemy!=null && speedEnemy.posY + speedEnemy.height / 2 == 404) {
             for (int i = 0; i < speedEnemyList.size(); i++) {
                 SpeedEnemy speedEnemy = speedEnemyList.get(i);
-                System.out.println(speedEnemy);
                 for (int j = 0; j < 16; j++) {
                     speedEnemyAttack = new SpeedEnemyAttack(speedEnemy.posX + speedEnemy.width / 2, speedEnemy.posY + speedEnemy.height / 2, new ImageIcon("src/images/speedEnemy_bullet.png").getImage());
-                    System.out.println(speedEnemy);
                     speedEnemyAttackList.add(speedEnemyAttack);
-                    System.out.println(speedEnemy+": "+speedEnemyAttack);
                 }
             }
         }
@@ -381,9 +388,9 @@ public class Game extends Thread{
         }
     }
     private void bossAttackProcess() {
-        if(boss!=null && cnt % 50 ==0) {
+        if(boss!=null && cnt % 180 ==0) {   // 5.4초마다 공격
             for (int i = 0; i < 9; i++) {
-                bossAttack = new BossAttack(10, (Main.SCREEN_WIDTH - 10)/2, boss.height, new ImageIcon("src/images/boss_bullet.png").getImage());
+                bossAttack = new BossAttack(10, (Main.SCREEN_WIDTH - 10)/2, boss.height-20, new ImageIcon("src/images/boss_bullet.png").getImage());
                 bossAttackList.add(bossAttack);
             }
         }
