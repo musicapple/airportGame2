@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="952e02f5-b694-4ad8-a85c-20c0866f1433" name="변경" comment="initialize">
+    <list default="true" id="952e02f5-b694-4ad8-a85c-20c0866f1433" name="변경" comment="boss 공격 추가">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/out/production/airportGame2/airport/Game.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/airportGame2/airport/Game.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/airport/Game.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/airport/Game.java" afterDir="false" />
@@ -30,13 +30,13 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "D:/coding/intellij/projects/airportGame2"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/coding/intellij/projects/airportGame2&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\coding\intellij\projects\airportGame2\src\images" />
@@ -85,6 +85,19 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="test2.Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="test2.Main" />
+      <module name="airportGame2" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="test2.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="test.Main" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="test.Main" />
       <module name="airportGame2" />
@@ -101,6 +114,7 @@
     <recent_temporary>
       <list>
         <item itemvalue="Application.Main" />
+        <item itemvalue="Application.test2.Main" />
       </list>
     </recent_temporary>
   </component>
@@ -127,12 +141,76 @@
       <option name="project" value="LOCAL" />
       <updated>1694061411556</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="시작하고 바로 총쏘면 에러걸리는 부분 에러해결">
+      <created>1694065009723</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1694065009723</updated>
+    </task>
+    <task id="LOCAL-00004" summary="시작하고 바로 총쏘면 에러걸리는 부분 에러해결">
+      <created>1694065043290</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1694065043290</updated>
+    </task>
+    <task id="LOCAL-00005" summary="아이템박스 화면안에서 날라다니는거 수정.">
+      <created>1694449157991</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1694449157991</updated>
+    </task>
+    <task id="LOCAL-00006" summary="아이템(헤비머신건) 장착해서 쏘는 것까지 완료.">
+      <created>1694518464737</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1694518464737</updated>
+    </task>
+    <task id="LOCAL-00007" summary="speedEnemy 총알 사방으로 퍼지기 수정2">
+      <created>1695020094204</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1695020094204</updated>
+    </task>
+    <task id="LOCAL-00008" summary="우주 배경 추가">
+      <created>1695054801447</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1695054801447</updated>
+    </task>
+    <task id="LOCAL-00009" summary="boss 이미지 추가">
+      <created>1695128269768</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1695128269768</updated>
+    </task>
+    <task id="LOCAL-00010" summary="boss 공격 추가">
+      <created>1695205066178</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1695205066178</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="initialize" />
-    <option name="LAST_COMMIT_MESSAGE" value="initialize" />
+    <MESSAGE value="시작하고 바로 총쏘면 에러걸리는 부분 에러해결" />
+    <MESSAGE value="아이템박스 화면안에서 날라다니는거 수정." />
+    <MESSAGE value="아이템(헤비머신건) 장착해서 쏘는 것까지 완료." />
+    <MESSAGE value="speedEnemy 총알 사방으로 퍼지기 수정" />
+    <MESSAGE value="speedEnemy 총알 사방으로 퍼지기 수정2" />
+    <MESSAGE value="우주 배경 추가" />
+    <MESSAGE value="boss 이미지 추가" />
+    <MESSAGE value="boss 공격 추가" />
+    <option name="LAST_COMMIT_MESSAGE" value="boss 공격 추가" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
