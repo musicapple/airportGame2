@@ -70,9 +70,13 @@ public class Game extends Thread{
     private SpeedEnemy speedEnemy;  // 빠르게 등장해서 요격하고 사라지는 적기체
 
     private Boss boss; // 보스기체
+
 //-------------------폭발 선언--------------------------------------------------------------
     ArrayList<Boom> boomList = new ArrayList<>(); // 폭발을 여러번함.
     private Boom boom; // 적 격추했을 때 발생하는 폭발 이미지
+
+    ArrayList<BossBoom> bossBoomList = new ArrayList<>();   // 폭발을 여러번함.
+    private BossBoom bossBoom;  // 보스 격추했을 때 발생하는 폭발 이미지
 //--------------------헤비 머신건(아이템) 선언------------------------------------------------
     private Item item;
 //---------------------------------------------------------------------------------------
@@ -284,7 +288,7 @@ public class Game extends Thread{
                     playerAttackList.remove(j); // 총알 제거
                     if(secondEnemy.hp <= 0) {   // 적 hp 0이하로 떨어지면 if문 true
                         secondEnemyList.remove(i);  // secondEnemy 제거
-                        boomList.add(new Boom(secondEnemy.posX, secondEnemy.posY, 80, 80));
+                            boomList.add(new Boom(secondEnemy.posX, secondEnemy.posY, 80, 80));
                     }
                 }
             }
@@ -310,6 +314,7 @@ public class Game extends Thread{
                     boss.hp = boss.hp - 50;  // boss 피격시 hp 50 차감
                     playerAttackList.remove(i); // 총알 제거
                     if (boss.hp <= 0) {
+                        bossBoomList.add(new BossBoom(boss.posX+boss.width/2-200,0,450,250));
                         boss = null;
                     }
                 }
@@ -484,6 +489,7 @@ public class Game extends Thread{
         speedEnemyAttackDraw(g);
         bossAttackDraw(g);
         boomDraw(g);
+        bossBoomDraw(g);
         itemDraw(g);
     }
 
@@ -525,6 +531,7 @@ public class Game extends Thread{
             }
         }
     }
+
     public void firstEnemyAttackDraw(Graphics g) {
         for(int i = 0; i<firstEnemyAttackList.size(); i++) {
             firstEnemyAttack = firstEnemyAttackList.get(i);
@@ -578,6 +585,28 @@ public class Game extends Thread{
             boom.show();
             if(boom.cnt==224){
                 boomList.remove(i);
+            }
+        }
+    }
+    public void bossBoomDraw(Graphics g) {  // 적기체 연쇄폭발 이미지
+        for (int i = 0; i < bossBoomList.size(); i++) {
+            bossBoom = bossBoomList.get(i);
+            if (bossBoom.cnt <= 8) {
+                g.drawImage(bossBoom.image1, bossBoom.posX, bossBoom.posY, null);
+            } else if (bossBoom.cnt <= 32) {
+                g.drawImage(bossBoom.image2, bossBoom.posX, bossBoom.posY, null);
+            } else if (bossBoom.cnt <= 64) {
+                g.drawImage(bossBoom.image3, bossBoom.posX, bossBoom.posY, null);
+            } else if (bossBoom.cnt <= 96) {
+                g.drawImage(bossBoom.image4, bossBoom.posX, bossBoom.posY, null);
+            } else if (bossBoom.cnt <= 128) {
+                g.drawImage(bossBoom.image5, bossBoom.posX, bossBoom.posY, null);
+            } else if (bossBoom.cnt <= 160) {
+                g.drawImage(bossBoom.image6, bossBoom.posX, bossBoom.posY, null);
+            }
+            bossBoom.show();
+            if(bossBoom.cnt==160){
+                bossBoomList.remove(i);
             }
         }
     }
