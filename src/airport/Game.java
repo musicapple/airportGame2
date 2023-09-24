@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.TimerTask;
 import java.util.Timer;
 
+import static airport.Main.airportGame;
+
 public class Game extends Thread{
     private int delay = 30;
     private long pretime;
@@ -316,6 +318,14 @@ public class Game extends Thread{
                     if (boss.hp <= 0) {
                         bossBoomList.add(new BossBoom(boss.posX+boss.width/2-200,0,450,250));
                         boss = null;
+                        Timer loadingTimer = new Timer();
+                        TimerTask loadingTask = new TimerTask(){
+                            @Override
+                            public void run() {
+                                airportGame.setIsEndgameScreen(true);
+                            }
+                        };
+                        loadingTimer.schedule(loadingTask, 1500);
                     }
                 }
             }
