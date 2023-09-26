@@ -4,13 +4,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.TimerTask;
-import java.util.Timer;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
+import static airport.Main.airportGame;
 
 public class AirportGame extends JFrame {
-
-    private JButton button = new JButton("버튼");
 
     private Image bufferImage;
     private Graphics screenGraphic;
@@ -23,11 +22,19 @@ public class AirportGame extends JFrame {
     private Image backgroundScreen4 = new ImageIcon("src/images/background4.jpg").getImage();
     private Image backgroundScreen5 = new ImageIcon("src/images/background5.jpg").getImage();
     private Image backgroundScreen6 = new ImageIcon("src/images/background6.jpg").getImage();
+    private ImageIcon startButtonBasic = new ImageIcon("src/images/startButtonBasic.png");
+    private ImageIcon startButtonEntered = new ImageIcon("src/images/startButtonEntered.png");
+    private ImageIcon exitButtonBasic = new ImageIcon("src/images/exitButtonBasic.png");
+    private ImageIcon exitButtonEntered = new ImageIcon("src/images/exitButtonEntered.png");
 
-    private Image loadingScreen = new ImageIcon("src/images/loading_screen.png").getImage();
     private Image endGameScreen = new ImageIcon("src/images/endGameScreen.png").getImage();
-    private boolean isMainScreen, isGameScreen, isLoadingScreen, isEndgameScreen;
-    private Game game = new Game();
+    boolean isMainScreen;
+    boolean isGameScreen;
+    boolean isEndgameScreen;
+    public static Game game = new Game();
+
+    private JButton startButton = new JButton(startButtonBasic);
+    private JButton exitButton = new JButton(exitButtonBasic);
 
     public AirportGame() {
         setUndecorated(true);
@@ -42,30 +49,49 @@ public class AirportGame extends JFrame {
         setLayout(null);
         init(); // 초기화
 
-        button.setBounds(100,100,100,100);
-        add(button);
+        startButton.setBounds(90,400,150,80);
+        exitButton.setBounds(90,500,150,80);
+
+        startButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e){
+                startButton.setIcon(startButtonEntered);
+            }
+            @Override
+            public void mouseExited(MouseEvent e){
+                startButton.setIcon(startButtonBasic);
+            };
+        });
+        add(startButton);
+
+        exitButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e){
+                exitButton.setIcon(exitButtonEntered);
+            }
+            @Override
+            public void mouseExited(MouseEvent e){
+                exitButton.setIcon(exitButtonBasic);
+            };
+            public void mouseClicked(MouseEvent e){
+                System.exit(0);
+            };
+        });
+        add(exitButton);
     }
     private void init() {
         isMainScreen = true;
-        isLoadingScreen = false;
         isGameScreen = false;
         isEndgameScreen = false;
-        addKeyListener(new KeyListener());
+        startButton.addActionListener(new ButtonListener());
     }
-    private void gameStart() {
-        isMainScreen = false;
-        isLoadingScreen = true;
-        isEndgameScreen = false;
-        Timer loadingTimer = new Timer();
-        TimerTask loadingTask = new TimerTask() {
-            @Override
-            public void run() {
-                isLoadingScreen = false;
-                isGameScreen = true;
-                game.start();   // game클래스의 스레드 시작.
-            }
-        };
-        loadingTimer.schedule(loadingTask, 1000);
+   public void gameStart(){
+        if(isGameScreen) {
+            remove(startButton);
+            remove(exitButton);
+            addKeyListener(new KeyListener());
+            requestFocus();
+        }
     }
     // JFrame 객체에 그림을 그리는 메소드
     // GUI 프로그램이 실행될 경우 JVM에 의해 자동으로 호출
@@ -82,12 +108,6 @@ public class AirportGame extends JFrame {
     public void screenDraw(Graphics g) { // 메모리상(screenGraphic)에서 그림을 그림
         if (isMainScreen) {
             g.drawImage(mainScreen, 0, 0, null);
-            /*btn.setBounds(100,100,100,100);
-            btn.setBorderPainted(false);
-            //btn.setContentAreaFilled(false);
-            btn.setFocusPainted(false);
-            add(btn);
-            paintComponents(g);*/
         }
         if (isGameScreen) {
             backgroundY++;
@@ -100,9 +120,6 @@ public class AirportGame extends JFrame {
             g.drawImage(backgroundScreen6,0,backgroundY-backgroundScreen1.getHeight(null)-backgroundScreen2.getHeight(null)-backgroundScreen3.getHeight(null)-backgroundScreen4.getHeight(null)-backgroundScreen5.getHeight(null)-backgroundScreen5.getHeight(null),null);// 무한반복 테스트용
             game.gameDraw(g);
         }
-        if (isLoadingScreen) {
-            g.drawImage(loadingScreen, 0, 0, null);
-        }
         if(isEndgameScreen) {
             g.drawImage(endGameScreen,0,0,null);
         }
@@ -110,11 +127,9 @@ public class AirportGame extends JFrame {
         this.repaint(); // paint() 다시 그리기
     }
     //-----------------------------------------------------------
-
     public void setIsEndgameScreen(boolean isEndgameScreen) {
         this.isEndgameScreen = isEndgameScreen;
     }
-
     //-----------------------------------------------------------
     // 키보드를 눌렀을 때 각 기능
     class KeyListener extends KeyAdapter {
@@ -137,11 +152,6 @@ public class AirportGame extends JFrame {
                 case KeyEvent.VK_ESCAPE:
                     if(isMainScreen) {
                         System.exit(0);
-                        break;
-                    }
-                case KeyEvent.VK_ENTER:
-                    if(isMainScreen) {
-                        gameStart();
                         break;
                     }
                 case KeyEvent.VK_CONTROL:

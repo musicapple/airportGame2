@@ -24,11 +24,7 @@ public class Game extends Thread{
     private int bossDrawCount = 0;          // boss 적기 그려지는 횟수
     private int GameScreenCount = 0;        // GameScreen,GameScreenRed 구별하기위해 카운트
 
-    private Image player = new ImageIcon("src/images/player.png").getImage();  // player 이미지 저장
-    private int playerX, playerY;   // player의 위치
-    private int playerWidth = player.getWidth(null);    // player 너비 지정
-    private int playerHeight = player.getHeight(null);  // player 높이 지정
-    private int playerSpeed = 10;   // 키 입력이 한번 인식됐을 때 플레이어가 이동할 거리
+    private Player player = new Player(150, (Main.SCREEN_WIDTH+25) / 2, (Main.SCREEN_HEIGHT-50),new ImageIcon("src/images/player.png").getImage(),10);
 
     private boolean up, down, right, left, shooting;  // 플레이어의 움직임을 제어할 변수
     private Image gameScreenRed = new ImageIcon("src/images/game_screenRed.png").getImage();
@@ -37,7 +33,6 @@ public class Game extends Thread{
     private boolean movingRight;
     private boolean movingLeft;
     private boolean movingUnder;
-    private boolean movingOn;
     private boolean itemCollisionWithPlayer; // 아이템과 플레이가 충돌했을때
 
     //---------------적 공격 선언 ----------------------------------------------------------
@@ -85,8 +80,6 @@ public class Game extends Thread{
     @Override
     public void run() { // run메소드는 이 쓰레드를 시작할 시 실행될 내용
         cnt = 0;
-        playerX = (Main.SCREEN_WIDTH+playerWidth) / 2;
-        playerY = (Main.SCREEN_HEIGHT-playerHeight);
         startTime =  System.currentTimeMillis();
         while(true) {   // 쓰레드가 시작하면서 while안의 코드가 무한 반복.
             if(true) {
@@ -121,20 +114,20 @@ public class Game extends Thread{
         }
     }
     private void keyProcess() {
-        if(up && playerY - playerSpeed > 0)
-            playerY -= playerSpeed;
-        if(down && playerY + playerHeight + playerSpeed < Main.SCREEN_HEIGHT)
-            playerY += playerSpeed;
-        if(left && playerX - playerSpeed > 0)
-            playerX -= playerSpeed;
-        if(right && playerX + playerWidth + playerSpeed < Main.SCREEN_WIDTH)
-            playerX += playerSpeed;
+        if(up && player.posY - player.playerSpeed > 0)
+            player.posY -= player.playerSpeed;
+        if(down && player.posY + player.height + player.playerSpeed < Main.SCREEN_HEIGHT)
+            player.posY += player.playerSpeed;
+        if(left && player.posX - player.playerSpeed > 0)
+            player.posX -= player.playerSpeed;
+        if(right && player.posX + player.width + player.playerSpeed < Main.SCREEN_WIDTH)
+            player.posX += player.playerSpeed;
         if(shooting && cnt % 8 == 0) { // 0, 0.24, 0.48, 0.72, 0.96 ,... 이 때 눌러야 실행됨.
             if(!itemCollisionWithPlayer) {  // 기본공격
-                playerAttack = new PlayerAttack(new ImageIcon("src/images/player_attack.png").getImage(), playerX + player.getWidth(null) / 2, playerY - 10); // 미사일이 player 좌표의 50만큼 위에서부터 생성됨.
+                playerAttack = new PlayerAttack(new ImageIcon("src/images/player_attack.png").getImage(), player.posX + player.width / 2, player.posY - 10); // 미사일이 player 좌표의 50만큼 위에서부터 생성됨.
                 playerAttackList.add(playerAttack);
             } else if(itemCollisionWithPlayer){ // 헤비머신건 공격
-                playerAttack = new PlayerAttack(new ImageIcon("src/images/bullet2.png").getImage(), playerX + player.getWidth(null) / 2, playerY - 10); // 미사일이 player 좌표의 50만큼 위에서부터 생성됨.
+                playerAttack = new PlayerAttack(new ImageIcon("src/images/bullet2.png").getImage(), player.posX + player.width / 2, player.posY - 10); // 미사일이 player 좌표의 50만큼 위에서부터 생성됨.
                 playerAttackList.add(playerAttack);
             }
         }
@@ -309,35 +302,48 @@ public class Game extends Thread{
                 }
             }
         }
-        if(boss != null) {
-            for (int i = 0; i < playerAttackList.size(); i++) {
-                playerAttack = playerAttackList.get(i);
-                if (boss != null && Crash(playerAttack.x, playerAttack.y, boss.posX, boss.posY, playerAttack.width, playerAttack.height, boss.width, boss.height)) {
-                    boss.hp = boss.hp - 50;  // boss 피격시 hp 50 차감
-                    playerAttackList.remove(i); // 총알 제거
-                    if (boss.hp <= 0) {
-                        bossBoomList.add(new BossBoom(boss.posX+boss.width/2-200,0,450,250));
-                        boss = null;
-                        Timer loadingTimer = new Timer();
-                        TimerTask loadingTask = new TimerTask(){
-                            @Override
-                            public void run() {
-                                airportGame.setIsEndgameScreen(true);
-                            }
-                        };
-                        loadingTimer.schedule(loadingTask, 1500);
-                    }
+
+        for (int i = 0; i < playerAttackList.size(); i++) {
+            playerAttack = playerAttackList.get(i);
+            if (boss != null && Crash(playerAttack.x, playerAttack.y, boss.posX, boss.posY, playerAttack.width, playerAttack.height, boss.width, boss.height)) {
+                boss.hp = boss.hp - 50;  // boss 피격시 hp 50 차감
+                playerAttackList.remove(i); // 총알 제거
+                if (boss.hp <= 0) {
+                    bossBoomList.add(new BossBoom(boss.posX+boss.width/2-200,0,450,250));
+                    boss = null;
+                    Timer loadingTimer = new Timer();
+                    TimerTask loadingTask = new TimerTask(){
+                        @Override
+                        public void run() {
+                            airportGame.setIsEndgameScreen(true);
+                        }
+                    };
+                    loadingTimer.schedule(loadingTask, 1500);
                 }
             }
         }
     }
+
     // -------------- 총알 생성 메서드 -----------------------------------------------
     private void firstEnemyAttackProcess() {   // firstEnemy 총알 생성 메서드
         for(int i=0; i<firstEnemyList.size(); i++) {
             firstEnemy = firstEnemyList.get(i);
-            if(cnt % 20 == 0) { // 0, 0.6, 1.2, 1.8, ...초마다 총알 생성
+            if (cnt % 20 == 0) { // 0, 0.6, 1.2, 1.8, ...초마다 총알 생성
                 firstEnemyAttack = new FirstEnemyAttack(firstEnemy.posX, firstEnemy.posY, new ImageIcon("src/images/firstEnemy_bullet.png").getImage());
                 firstEnemyAttackList.add(firstEnemyAttack);
+            }
+            for (int j = 0; j < firstEnemyAttackList.size(); j++) {
+                firstEnemyAttack = firstEnemyAttackList.get(j);
+                if (firstEnemyAttack!=null && Crash(firstEnemyAttack.posX, firstEnemyAttack.posY, player.posX, player.posY, firstEnemyAttack.width, firstEnemyAttack.height, player.width, player.height)) {
+                    firstEnemyAttackList.remove(j);   //총알 제거
+                    player.hp -= 50;
+                    System.out.println("피격");
+                    if (player.hp <= 0) {
+                        System.out.println("죽음");
+                        boomList.add(new Boom(player.posX, player.posY, 120, 120));
+
+                    }
+                }
             }
         }
         for(int i=0; i<firstEnemyAttackList.size(); i++) {
@@ -467,7 +473,7 @@ public class Game extends Thread{
             if (movingDrop) {
                 item.dropMove();
             }
-            if (Crash(item.posX + item.width / 2, item.posY + item.height / 2, playerX + playerWidth / 2, playerY + playerHeight / 2, item.width, item.height, playerWidth, playerHeight)) {
+            if (Crash(item.posX + item.width / 2, item.posY + item.height / 2, player.posX + player.width / 2, player.posY + player.height / 2, item.width, item.height, player.width, player.height)) {
                 item = null;
                 itemCollisionWithPlayer = true;
             }
@@ -504,7 +510,7 @@ public class Game extends Thread{
     }
 
     public void playerDraw(Graphics g) {
-        g.drawImage(player,playerX,playerY,playerWidth, playerHeight,null);
+        g.drawImage(player.image,player.posX,player.posY,player.width, player.height,null);
         for(int i = 0; i < playerAttackList.size(); i++) {
             playerAttack = playerAttackList.get(i);
             g.drawImage(playerAttack.image,playerAttack.x,playerAttack.y,playerAttack.width,playerAttack.height,null);
