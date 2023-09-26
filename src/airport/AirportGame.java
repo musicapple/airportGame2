@@ -10,13 +10,13 @@ import java.util.Timer;
 
 public class AirportGame extends JFrame {
 
-    JButton btn = new JButton("버튼");
+    private JButton button = new JButton("버튼");
 
     private Image bufferImage;
     private Graphics screenGraphic;
     private int backgroundY = 0;
 
-    private Image mainScreen = new ImageIcon("src/images/main_screen.png").getImage(); // ImageIcon안에는 이미지 파일의 경로를 넣어준다.
+    private Image mainScreen = new ImageIcon("src/images/mainScreen.jpg").getImage(); // ImageIcon안에는 이미지 파일의 경로를 넣어준다.
     private Image backgroundScreen1 = new ImageIcon("src/images/background1.jpg").getImage();
     private Image backgroundScreen2 = new ImageIcon("src/images/background2.jpg").getImage();
     private Image backgroundScreen3 = new ImageIcon("src/images/background3.jpg").getImage();
@@ -30,6 +30,7 @@ public class AirportGame extends JFrame {
     private Game game = new Game();
 
     public AirportGame() {
+        setUndecorated(true);
         setTitle("비행기 게임");
         setUndecorated(true);
         setSize(Main.SCREEN_WIDTH, Main.SCREEN_HEIGHT);
@@ -37,13 +38,12 @@ public class AirportGame extends JFrame {
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
+        setBackground(new Color(0,0,0,0));  // paintcomponent 했을때 배경이 회색이 아니라 흰색으로 됨
         setLayout(null);
         init(); // 초기화
-        btn.setBounds(100,100,100,100);
-        btn.setBorderPainted(false);
-        btn.setContentAreaFilled(false);
-        btn.setFocusPainted(false);
-        add(btn);
+
+        button.setBounds(100,100,100,100);
+        add(button);
     }
     private void init() {
         isMainScreen = true;
@@ -82,6 +82,12 @@ public class AirportGame extends JFrame {
     public void screenDraw(Graphics g) { // 메모리상(screenGraphic)에서 그림을 그림
         if (isMainScreen) {
             g.drawImage(mainScreen, 0, 0, null);
+            /*btn.setBounds(100,100,100,100);
+            btn.setBorderPainted(false);
+            //btn.setContentAreaFilled(false);
+            btn.setFocusPainted(false);
+            add(btn);
+            paintComponents(g);*/
         }
         if (isGameScreen) {
             backgroundY++;
@@ -100,7 +106,8 @@ public class AirportGame extends JFrame {
         if(isEndgameScreen) {
             g.drawImage(endGameScreen,0,0,null);
         }
-        //this.repaint(); // paint() 다시 그리기
+        paintComponents(g);
+        this.repaint(); // paint() 다시 그리기
     }
     //-----------------------------------------------------------
 
