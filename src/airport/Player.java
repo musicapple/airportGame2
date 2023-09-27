@@ -10,6 +10,8 @@ public class Player {
     protected int width;
     protected int height;
     protected int playerSpeed;
+    protected int life;
+
     public Player(int hp, int posX, int posY, Image image,int playerSpeed){
         this.hp = hp;
         this.posX = posX;
@@ -18,5 +20,6 @@ public class Player {
         this.width = image.getWidth(null);
         this.height = image.getHeight(null);
         this.playerSpeed = playerSpeed;
+        this.life = 1;
     }
 }

@@ -24,8 +24,6 @@ public class Game extends Thread{
     private int bossDrawCount = 0;          // boss 적기 그려지는 횟수
     private int GameScreenCount = 0;        // GameScreen,GameScreenRed 구별하기위해 카운트
 
-    private Player player = new Player(150, (Main.SCREEN_WIDTH+25) / 2, (Main.SCREEN_HEIGHT-50),new ImageIcon("src/images/player.png").getImage(),10);
-
     private boolean up, down, right, left, shooting;  // 플레이어의 움직임을 제어할 변수
     private Image gameScreenRed = new ImageIcon("src/images/game_screenRed.png").getImage();
     private boolean isGameScreenRed;
@@ -34,7 +32,11 @@ public class Game extends Thread{
     private boolean movingLeft;
     private boolean movingUnder;
     private boolean itemCollisionWithPlayer; // 아이템과 플레이가 충돌했을때
-
+    private boolean isPlayerHidden;
+    private boolean isGameClear;
+    private boolean isGameOver;
+    //---------------player 선언 ----------------------------------------------------------
+    private Player player = new Player(150, (Main.SCREEN_WIDTH+25) / 2, (Main.SCREEN_HEIGHT-50),new ImageIcon("src/images/player.png").getImage(),10);
     //---------------적 공격 선언 ----------------------------------------------------------
     ArrayList<PlayerAttack> playerAttackList = new ArrayList<>(); // 미사일이 하나만 발사되는게 아니라 여러개 발사됨.
     private PlayerAttack playerAttack; // 미사일
@@ -67,8 +69,7 @@ public class Game extends Thread{
     private SpeedEnemy speedEnemy;  // 빠르게 등장해서 요격하고 사라지는 적기체
 
     private Boss boss; // 보스기체
-
-//-------------------폭발 선언--------------------------------------------------------------
+    //-------------------폭발 선언--------------------------------------------------------------
     ArrayList<Boom> boomList = new ArrayList<>(); // 폭발을 여러번함.
     private Boom boom; // 적 격추했을 때 발생하는 폭발 이미지
 
@@ -81,7 +82,7 @@ public class Game extends Thread{
     public void run() { // run메소드는 이 쓰레드를 시작할 시 실행될 내용
         cnt = 0;
         startTime =  System.currentTimeMillis();
-        while(true) {   // 쓰레드가 시작하면서 while안의 코드가 무한 반복.
+        while(!isGameClear) {   // 쓰레드가 시작하면서 while안의 코드가 무한 반복.
             if(true) {
                 try {
                     Thread.sleep(delay); // 30/1000초 동안 스레드는 일시정지 상태
@@ -315,7 +316,9 @@ public class Game extends Thread{
                     TimerTask loadingTask = new TimerTask(){
                         @Override
                         public void run() {
-                            airportGame.setIsEndgameScreen(true);
+                            airportGame.isGameScreen = false;
+                            airportGame.isEndgameScreen = true;
+                            isGameClear = true;
                         }
                     };
                     loadingTimer.schedule(loadingTask, 1500);
@@ -339,9 +342,34 @@ public class Game extends Thread{
                     player.hp -= 50;
                     System.out.println("피격");
                     if (player.hp <= 0) {
-                        System.out.println("죽음");
-                        boomList.add(new Boom(player.posX, player.posY, 120, 120));
+                        isPlayerHidden = true; // player 숨기기
 
+                        Timer loadingTimer = new Timer();
+                        TimerTask loadingTask = new TimerTask() {
+                            @Override
+                            public void run() {
+                                isPlayerHidden = false; // player 다시 보이게 하기
+                                player.posX = (Main.SCREEN_WIDTH+25) / 2;
+                                player.posY = (Main.SCREEN_HEIGHT-50);
+                            }
+                        };
+                        loadingTimer.schedule(loadingTask,1500);
+
+                        boomList.add(new Boom(player.posX, player.posY, 120, 120));
+                        player.life--;
+                        if(player.life <= 0) {
+                            Timer loadingTimer2 = new Timer();
+                            TimerTask loadingTask2 = new TimerTask() {
+                                @Override
+                                public void run() { // player 사망시 GameOver화면으로 전환
+                                    airportGame.isGameScreen = false;
+                                    airportGame.isGameOverScreen = true;
+                                }
+                            };
+                            loadingTimer2.schedule(loadingTask2,1500);
+                        }
+                        player.hp = 150;
+                        System.out.println("남은목숨: " + player.life);
                     }
                 }
             }
@@ -510,10 +538,12 @@ public class Game extends Thread{
     }
 
     public void playerDraw(Graphics g) {
-        g.drawImage(player.image,player.posX,player.posY,player.width, player.height,null);
-        for(int i = 0; i < playerAttackList.size(); i++) {
-            playerAttack = playerAttackList.get(i);
-            g.drawImage(playerAttack.image,playerAttack.x,playerAttack.y,playerAttack.width,playerAttack.height,null);
+        if (!isPlayerHidden) {
+            g.drawImage(player.image, player.posX, player.posY, player.width, player.height, null);
+            for (int i = 0; i < playerAttackList.size(); i++) {
+                playerAttack = playerAttackList.get(i);
+                g.drawImage(playerAttack.image, playerAttack.x, playerAttack.y, playerAttack.width, playerAttack.height, null);
+            }
         }
     }
     public void firstEnemyDraw(Graphics g) {

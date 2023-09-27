@@ -26,11 +26,13 @@ public class AirportGame extends JFrame {
     private ImageIcon startButtonEntered = new ImageIcon("src/images/startButtonEntered.png");
     private ImageIcon exitButtonBasic = new ImageIcon("src/images/exitButtonBasic.png");
     private ImageIcon exitButtonEntered = new ImageIcon("src/images/exitButtonEntered.png");
-
     private Image endGameScreen = new ImageIcon("src/images/endGameScreen.png").getImage();
+    private Image gameOverScreen = new ImageIcon("src/images/gameOverScreen.png").getImage();
+
     boolean isMainScreen;
     boolean isGameScreen;
     boolean isEndgameScreen;
+    boolean isGameOverScreen;
     public static Game game = new Game();
 
     private JButton startButton = new JButton(startButtonBasic);
@@ -123,13 +125,13 @@ public class AirportGame extends JFrame {
         if(isEndgameScreen) {
             g.drawImage(endGameScreen,0,0,null);
         }
+        if(isGameOverScreen) {
+            g.drawImage(gameOverScreen,0,0,null);
+        }
         paintComponents(g);
         this.repaint(); // paint() 다시 그리기
     }
-    //-----------------------------------------------------------
-    public void setIsEndgameScreen(boolean isEndgameScreen) {
-        this.isEndgameScreen = isEndgameScreen;
-    }
+
     //-----------------------------------------------------------
     // 키보드를 눌렀을 때 각 기능
     class KeyListener extends KeyAdapter {
