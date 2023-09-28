@@ -20,6 +20,6 @@ public class Player {
         this.width = image.getWidth(null);
         this.height = image.getHeight(null);
         this.playerSpeed = playerSpeed;
-        this.life = 1;
+        this.life = 3;
     }
 }

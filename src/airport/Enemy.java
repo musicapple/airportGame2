@@ -71,9 +71,11 @@ class SpeedEnemy extends Enemy {
     }
 }
 class Boss extends Enemy {
+    protected Image imageAttacked;
 
-    public Boss(int hp, int posX, int posY, Image image) {
+    public Boss(int hp, int posX, int posY, Image image, Image imageAttacked) {
         super(hp, posX, posY, image);
+        this.imageAttacked = imageAttacked;
     }
     public void move() {
         posY += 3;  // 적기 위에서 아래로 이동

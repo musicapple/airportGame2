@@ -7,7 +7,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.TimerTask;
 import java.util.Timer;
-
 import static airport.Main.airportGame;
 
 public class Game extends Thread{
@@ -23,6 +22,7 @@ public class Game extends Thread{
     private int speedEnemyDrawCount = 0;    // speedEnemyDrawCount 적기 그려지는 횟수
     private int bossDrawCount = 0;          // boss 적기 그려지는 횟수
     private int GameScreenCount = 0;        // GameScreen,GameScreenRed 구별하기위해 카운트
+    private int lifeCount = 2;              // player가 가지는 총 생명
 
     private boolean up, down, right, left, shooting;  // 플레이어의 움직임을 제어할 변수
     private Image gameScreenRed = new ImageIcon("src/images/game_screenRed.png").getImage();
@@ -35,8 +35,11 @@ public class Game extends Thread{
     private boolean isPlayerHidden;
     private boolean isGameClear;
     private boolean isGameOver;
+    private boolean isBossAttacked;
     //---------------player 선언 ----------------------------------------------------------
     private Player player = new Player(150, (Main.SCREEN_WIDTH+25) / 2, (Main.SCREEN_HEIGHT-50),new ImageIcon("src/images/player.png").getImage(),10);
+    private Image lifeImage = new ImageIcon("src/images/lifeImage.png").getImage();
+
     //---------------적 공격 선언 ----------------------------------------------------------
     ArrayList<PlayerAttack> playerAttackList = new ArrayList<>(); // 미사일이 하나만 발사되는게 아니라 여러개 발사됨.
     private PlayerAttack playerAttack; // 미사일
@@ -239,7 +242,7 @@ public class Game extends Thread{
     public void bossAppearProcess() {
         if(bossDrawCount < 1) {
             if(endTime - startTime >= 4000 ) {   // 1초에 첫번째 기체 등장 11초 후 두번째 기체 등장
-                boss = new Boss(200,Main.SCREEN_WIDTH/2-319,-250, new ImageIcon("src/images/boss.png").getImage());
+                boss = new Boss(20000,Main.SCREEN_WIDTH/2-319,-250, new ImageIcon("src/images/boss.png").getImage(), new ImageIcon("src/images/bossAttacked.png").getImage());
                 bossDrawCount++;
             }
         }
@@ -308,6 +311,15 @@ public class Game extends Thread{
             playerAttack = playerAttackList.get(i);
             if (boss != null && Crash(playerAttack.x, playerAttack.y, boss.posX, boss.posY, playerAttack.width, playerAttack.height, boss.width, boss.height)) {
                 boss.hp = boss.hp - 50;  // boss 피격시 hp 50 차감
+                isBossAttacked = true;  // boss 이미지 attack 당했을때로 바꿔주기위함
+                Timer loadingTimer2 = new Timer();
+                TimerTask loadingTask2 = new TimerTask() {
+                    @Override
+                    public void run() {
+                        isBossAttacked = false;
+                    }
+                };
+                loadingTimer2.schedule(loadingTask2,100);
                 playerAttackList.remove(i); // 총알 제거
                 if (boss.hp <= 0) {
                     bossBoomList.add(new BossBoom(boss.posX+boss.width/2-200,0,450,250));
@@ -342,21 +354,8 @@ public class Game extends Thread{
                     player.hp -= 50;
                     System.out.println("피격");
                     if (player.hp <= 0) {
-                        isPlayerHidden = true; // player 숨기기
-
-                        Timer loadingTimer = new Timer();
-                        TimerTask loadingTask = new TimerTask() {
-                            @Override
-                            public void run() {
-                                isPlayerHidden = false; // player 다시 보이게 하기
-                                player.posX = (Main.SCREEN_WIDTH+25) / 2;
-                                player.posY = (Main.SCREEN_HEIGHT-50);
-                            }
-                        };
-                        loadingTimer.schedule(loadingTask,1500);
-
                         boomList.add(new Boom(player.posX, player.posY, 120, 120));
-                        player.life--;
+                        isPlayerHidden = true; // player 숨기기
                         if(player.life <= 0) {
                             Timer loadingTimer2 = new Timer();
                             TimerTask loadingTask2 = new TimerTask() {
@@ -368,6 +367,19 @@ public class Game extends Thread{
                             };
                             loadingTimer2.schedule(loadingTask2,1500);
                         }
+                        Timer loadingTimer = new Timer();
+                        TimerTask loadingTask = new TimerTask() {
+                            @Override
+                            public void run() {
+                                isPlayerHidden = false; // player 다시 보이게 하기
+                                player.posX = (Main.SCREEN_WIDTH+25) / 2;
+                                player.posY = (Main.SCREEN_HEIGHT-50);
+                            }
+                        };
+                        loadingTimer.schedule(loadingTask,1500);
+                        player.life--;
+                        lifeCount--;
+
                         player.hp = 150;
                         System.out.println("남은목숨: " + player.life);
                     }
@@ -535,6 +547,7 @@ public class Game extends Thread{
         boomDraw(g);
         bossBoomDraw(g);
         itemDraw(g);
+        lifeImageDraw(g);
     }
 
     public void playerDraw(Graphics g) {
@@ -572,8 +585,10 @@ public class Game extends Thread{
     }
     public void bossDraw(Graphics g) {
         if (boss != null) {
-            if (boss.image != null) {
+            if (boss.image != null && isBossAttacked == false) {
                 g.drawImage(boss.image, boss.posX, boss.posY, boss.width, boss.height, null);
+            } else if(boss.image != null && isBossAttacked == true){
+                g.drawImage(boss.imageAttacked, boss.posX, boss.posY, boss.width, boss.height, null);
             }
         }
     }
@@ -659,6 +674,14 @@ public class Game extends Thread{
     public void itemDraw(Graphics g) {
         if (item != null && item.image != null) {
             g.drawImage(item.image, item.posX, item.posY, null);
+        }
+    }
+    public void lifeImageDraw(Graphics g) {
+        if(lifeCount == 2) {
+            g.drawImage(lifeImage, 0, 0, null);
+            g.drawImage(lifeImage, 70, 0, null);
+        } else if(lifeCount == 1) {
+            g.drawImage(lifeImage, 0, 0, null);
         }
     }
     // -----------------------------------------------------------------------------------
