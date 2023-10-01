@@ -36,8 +36,9 @@ public class Game extends Thread{
     private boolean isGameClear;
     private boolean isGameOver;
     private boolean isBossAttacked;
+    private boolean isPlayerAttacked;
     //---------------player 선언 ----------------------------------------------------------
-    private Player player = new Player(150, (Main.SCREEN_WIDTH+25) / 2, (Main.SCREEN_HEIGHT-50),new ImageIcon("src/images/player.png").getImage(),10);
+    private Player player = new Player(150, (Main.SCREEN_WIDTH+25) / 2, (Main.SCREEN_HEIGHT-50),new ImageIcon("src/images/player.png").getImage(),new ImageIcon("src/images/playerAttacked.png").getImage(),10);
     private Image lifeImage = new ImageIcon("src/images/lifeImage.png").getImage();
 
     //---------------적 공격 선언 ----------------------------------------------------------
@@ -118,21 +119,23 @@ public class Game extends Thread{
         }
     }
     private void keyProcess() {
-        if(up && player.posY - player.playerSpeed > 0)
-            player.posY -= player.playerSpeed;
-        if(down && player.posY + player.height + player.playerSpeed < Main.SCREEN_HEIGHT)
-            player.posY += player.playerSpeed;
-        if(left && player.posX - player.playerSpeed > 0)
-            player.posX -= player.playerSpeed;
-        if(right && player.posX + player.width + player.playerSpeed < Main.SCREEN_WIDTH)
-            player.posX += player.playerSpeed;
-        if(shooting && cnt % 8 == 0) { // 0, 0.24, 0.48, 0.72, 0.96 ,... 이 때 눌러야 실행됨.
-            if(!itemCollisionWithPlayer) {  // 기본공격
-                playerAttack = new PlayerAttack(new ImageIcon("src/images/player_attack.png").getImage(), player.posX + player.width / 2, player.posY - 10); // 미사일이 player 좌표의 50만큼 위에서부터 생성됨.
-                playerAttackList.add(playerAttack);
-            } else if(itemCollisionWithPlayer){ // 헤비머신건 공격
-                playerAttack = new PlayerAttack(new ImageIcon("src/images/bullet2.png").getImage(), player.posX + player.width / 2, player.posY - 10); // 미사일이 player 좌표의 50만큼 위에서부터 생성됨.
-                playerAttackList.add(playerAttack);
+        if (!isPlayerHidden) {  // player 이미지가 사라진 상태에서 posX, posY를 못움직이게 하기위함.
+            if (up && player.posY - player.playerSpeed > 0)
+                player.posY -= player.playerSpeed;
+            if (down && player.posY + player.height + player.playerSpeed < Main.SCREEN_HEIGHT)
+                player.posY += player.playerSpeed;
+            if (left && player.posX - player.playerSpeed > 0)
+                player.posX -= player.playerSpeed;
+            if (right && player.posX + player.width + player.playerSpeed < Main.SCREEN_WIDTH)
+                player.posX += player.playerSpeed;
+            if (shooting && cnt % 8 == 0) { // 0, 0.24, 0.48, 0.72, 0.96 ,... 이 때 눌러야 실행됨.
+                if (!itemCollisionWithPlayer) {  // 기본공격
+                    playerAttack = new PlayerAttack(new ImageIcon("src/images/player_attack.png").getImage(), player.posX + player.width / 2, player.posY - 10); // 미사일이 player 좌표의 50만큼 위에서부터 생성됨.
+                    playerAttackList.add(playerAttack);
+                } else if (itemCollisionWithPlayer) { // 헤비머신건 공격
+                    playerAttack = new PlayerAttack(new ImageIcon("src/images/bullet2.png").getImage(), player.posX + player.width / 2, player.posY - 10); // 미사일이 player 좌표의 50만큼 위에서부터 생성됨.
+                    playerAttackList.add(playerAttack);
+                }
             }
         }
     }
@@ -349,39 +352,52 @@ public class Game extends Thread{
             }
             for (int j = 0; j < firstEnemyAttackList.size(); j++) {
                 firstEnemyAttack = firstEnemyAttackList.get(j);
-                if (firstEnemyAttack!=null && Crash(firstEnemyAttack.posX, firstEnemyAttack.posY, player.posX, player.posY, firstEnemyAttack.width, firstEnemyAttack.height, player.width, player.height)) {
-                    firstEnemyAttackList.remove(j);   //총알 제거
-                    player.hp -= 50;
-                    System.out.println("피격");
-                    if (player.hp <= 0) {
-                        boomList.add(new Boom(player.posX, player.posY, 120, 120));
-                        isPlayerHidden = true; // player 숨기기
-                        if(player.life <= 0) {
-                            Timer loadingTimer2 = new Timer();
-                            TimerTask loadingTask2 = new TimerTask() {
-                                @Override
-                                public void run() { // player 사망시 GameOver화면으로 전환
-                                    airportGame.isGameScreen = false;
-                                    airportGame.isGameOverScreen = true;
-                                }
-                            };
-                            loadingTimer2.schedule(loadingTask2,1500);
-                        }
-                        Timer loadingTimer = new Timer();
-                        TimerTask loadingTask = new TimerTask() {
+                if(!isPlayerHidden) {
+                    if (Crash(firstEnemyAttack.posX, firstEnemyAttack.posY, player.posX, player.posY, firstEnemyAttack.width, firstEnemyAttack.height, player.width, player.height)) {
+                        isPlayerAttacked = true;
+                        firstEnemyAttackList.remove(j);   //총알 제거
+                        player.hp -= 50;
+                        System.out.println("firstEnemy 피격");
+
+                        Timer loadingTimer3 = new Timer();  // player 공격당하면 반짝이는 효과
+                        TimerTask loadingTask3 = new TimerTask() {
                             @Override
                             public void run() {
-                                isPlayerHidden = false; // player 다시 보이게 하기
-                                player.posX = (Main.SCREEN_WIDTH+25) / 2;
-                                player.posY = (Main.SCREEN_HEIGHT-50);
+                                isPlayerAttacked = false;
                             }
                         };
-                        loadingTimer.schedule(loadingTask,1500);
-                        player.life--;
-                        lifeCount--;
+                        loadingTimer3.schedule(loadingTask3, 100);
 
-                        player.hp = 150;
-                        System.out.println("남은목숨: " + player.life);
+                        if (player.hp <= 0) {
+                            boomList.add(new Boom(player.posX, player.posY, 120, 120));
+                            isPlayerHidden = true; // player 숨기기
+                            if (player.life <= 0) {
+                                Timer loadingTimer2 = new Timer();
+                                TimerTask loadingTask2 = new TimerTask() {
+                                    @Override
+                                    public void run() { // player 사망시 GameOver화면으로 전환
+                                        airportGame.isGameScreen = false;
+                                        airportGame.isGameOverScreen = true;
+                                    }
+                                };
+                                loadingTimer2.schedule(loadingTask2, 1500);
+                            }
+                            Timer loadingTimer = new Timer();
+                            TimerTask loadingTask = new TimerTask() {
+                                @Override
+                                public void run() {
+                                    isPlayerHidden = false; // player 다시 보이게 하기
+                                    player.posX = (Main.SCREEN_WIDTH + 25) / 2;
+                                    player.posY = (Main.SCREEN_HEIGHT - 50);
+                                }
+                            };
+                            loadingTimer.schedule(loadingTask, 5500);
+                            player.life--;
+                            lifeCount--;
+
+                            player.hp = 150;
+                            System.out.println("남은목숨: " + player.life);
+                        }
                     }
                 }
             }
@@ -395,17 +411,68 @@ public class Game extends Thread{
         }
     }
     private void secondEnemyAttackProcess() {
-        for(int i=0; i<secondEnemyList.size(); i++){    // secondEnemy 총알 생성
+        for (int i = 0; i < secondEnemyList.size(); i++) {    // secondEnemy 총알 생성
             secondEnemy = secondEnemyList.get(i);
-            if(cnt % 20 == 0) {
-                secondEnemyAttack = new SecondEnemyAttack(secondEnemy.posX,secondEnemy.posY,new ImageIcon("src/images/secondEnemy_bullet.png").getImage());
+            if (cnt % 20 == 0) {
+                secondEnemyAttack = new SecondEnemyAttack(secondEnemy.posX, secondEnemy.posY, new ImageIcon("src/images/secondEnemy_bullet.png").getImage());
                 secondEnemyAttackList.add(secondEnemyAttack);
             }
+            for (int j = 0; j < secondEnemyAttackList.size(); j++) {
+                secondEnemyAttack = secondEnemyAttackList.get(j);
+                if(!isPlayerHidden) {
+                    if (Crash(secondEnemyAttack.posX, secondEnemyAttack.posY, player.posX, player.posY, secondEnemyAttack.width, secondEnemyAttack.height, player.width, player.height)) {
+                        isPlayerAttacked = true;
+                        secondEnemyAttackList.remove(j);    // 총알제거
+                        player.hp -= 50;
+                        System.out.println("secondEnemy 피격");
+
+                        Timer loadingTimer3 = new Timer();  // player 공격당하면 반짝이는 효과
+                        TimerTask loadingTask3 = new TimerTask() {
+                            @Override
+                            public void run() {
+                                isPlayerAttacked = false;
+                            }
+                        };
+                        loadingTimer3.schedule(loadingTask3, 100);
+
+                        if (player.hp <= 0) {
+                            boomList.add(new Boom(player.posX, player.posY, 120, 120));
+                            isPlayerHidden = true;  // player 숨기기
+                            if (player.life <= 0) {
+                                Timer loadingTimer2 = new Timer();
+                                TimerTask loadingTask2 = new TimerTask() {
+                                    @Override
+                                    public void run() { // player 사망시 GameOver화면으로 전환
+                                        airportGame.isGameScreen = false;
+                                        airportGame.isGameOverScreen = true;
+                                    }
+                                };
+                                loadingTimer2.schedule(loadingTask2, 1500);
+                            }
+                            Timer loadingTimer = new Timer();
+                            TimerTask loadingTask = new TimerTask() {
+                                @Override
+                                public void run() {
+                                    isPlayerHidden = false; // player 다시 보이게 하기
+                                    player.posX = (Main.SCREEN_WIDTH + 25) / 2;
+                                    player.posY = (Main.SCREEN_HEIGHT - 50);
+                                }
+                            };
+                            loadingTimer.schedule(loadingTask, 5500);
+                            player.life--;
+                            lifeCount--;
+
+                            player.hp = 150;
+                            System.out.println("남은목숨: " + player.life);
+                        }
+                    }
+                }
+            }
         }
-        for(int i=0; i<secondEnemyAttackList.size(); i++) {
-            secondEnemyAttack=secondEnemyAttackList.get(i);
+        for (int i = 0; i < secondEnemyAttackList.size(); i++) {
+            secondEnemyAttack = secondEnemyAttackList.get(i);
             secondEnemyAttack.fire();
-            if(secondEnemyAttack.posY > Main.SCREEN_HEIGHT){    // secondEnemy의 총알이 화면 맨밑으로 빠져나가면 메모리에서 제거됨
+            if (secondEnemyAttack.posY > Main.SCREEN_HEIGHT) {    // secondEnemy의 총알이 화면 맨밑으로 빠져나가면 메모리에서 제거됨
                 secondEnemyAttackList.remove(i);
             }
         }
@@ -416,6 +483,57 @@ public class Game extends Thread{
             if(cnt % 50 == 0) { // 1.5, 3.0, 4.5, ....
                 thirdEnemyAttack = new ThirdEnemyAttack(thirdEnemy.posX+thirdEnemy.width/2,thirdEnemy.posY+thirdEnemy.height,new ImageIcon("src/images/thirdEnemy_bullet.png").getImage());
                 thirdEnemyAttackList.add(thirdEnemyAttack);
+            }
+            for(int j =0; j<thirdEnemyAttackList.size(); j++) {
+                thirdEnemyAttack = thirdEnemyAttackList.get(j);
+                if(!isPlayerHidden) {
+                    if (Crash(thirdEnemyAttack.posX, thirdEnemyAttack.posY, player.posX, player.posY, thirdEnemyAttack.width, thirdEnemyAttack.height, player.width, player.height)) {
+                        isPlayerAttacked = true;
+                        thirdEnemyAttackList.remove(j);
+                        player.hp -= 50;
+                        System.out.println("thirdEnemy 피격");
+
+                        Timer loadingTimer3 = new Timer();  // player 공격당하면 반짝이는 효과
+                        TimerTask loadingTask3 = new TimerTask() {
+                            @Override
+                            public void run() {
+                                isPlayerAttacked = false;
+                            }
+                        };
+                        loadingTimer3.schedule(loadingTask3, 100);
+
+                        if (player.hp <= 0) {
+                            boomList.add(new Boom(player.posX, player.posY, 120, 120));
+                            isPlayerHidden = true;  // player 숨기기
+                            if (player.life <= 0) {
+                                Timer loadingTimer2 = new Timer();
+                                TimerTask loadingTask2 = new TimerTask() {
+                                    @Override
+                                    public void run() { // player 사망시 GameOver화면으로 전환
+                                        airportGame.isGameScreen = false;
+                                        airportGame.isGameOverScreen = true;
+                                    }
+                                };
+                                loadingTimer2.schedule(loadingTask2, 1500);
+                            }
+                            Timer loadingTimer = new Timer();
+                            TimerTask loadingTask = new TimerTask() {
+                                @Override
+                                public void run() {
+                                    isPlayerHidden = false; // player 다시 보이게 하기
+                                    player.posX = (Main.SCREEN_WIDTH + 25) / 2;
+                                    player.posY = (Main.SCREEN_HEIGHT - 50);
+                                }
+                            };
+                            loadingTimer.schedule(loadingTask, 5500);
+                            player.life--;
+                            lifeCount--;
+
+                            player.hp = 150;
+                            System.out.println("남은목숨: " + player.life);
+                        }
+                    }
+                }
             }
         }
         for(int i=0; i<thirdEnemyAttackList.size(); i++) {
@@ -447,23 +565,125 @@ public class Game extends Thread{
                 e.printStackTrace();
             }
         }
+        for(int i=0; i<speedEnemyAttackList.size(); i++) {  // speedEnemy가 player 공격시 충돌감지 및 생명갯수
+            speedEnemyAttack = speedEnemyAttackList.get(i);
+            if(!isPlayerHidden) {
+                if (Crash(speedEnemyAttack.posX, speedEnemyAttack.posY, player.posX, player.posY, speedEnemyAttack.width, speedEnemyAttack.height, player.width, player.height)) {
+                    isPlayerAttacked = true;
+                    speedEnemyAttackList.remove(i);
+                    player.hp -= 50;
+                    System.out.println("speedEnemy 피격");
+
+                    Timer loadingTimer3 = new Timer();  // player 공격당하면 반짝이는 효과
+                    TimerTask loadingTask3 = new TimerTask() {
+                        @Override
+                        public void run() {
+                            isPlayerAttacked = false;
+                        }
+                    };
+                    loadingTimer3.schedule(loadingTask3, 100);
+
+                    if (player.hp <= 0) {
+                        boomList.add(new Boom(player.posX, player.posY, 120, 120));
+                        isPlayerHidden = true;  // player 숨기기
+                        if (player.life <= 0) {
+                            Timer loadingTimer2 = new Timer();
+                            TimerTask loadingTask2 = new TimerTask() {
+                                @Override
+                                public void run() { // player 사망시 GameOver화면으로 전환
+                                    airportGame.isGameScreen = false;
+                                    airportGame.isGameOverScreen = true;
+                                }
+                            };
+                            loadingTimer2.schedule(loadingTask2, 1500);
+                        }
+                        Timer loadingTimer = new Timer();
+                        TimerTask loadingTask = new TimerTask() {
+                            @Override
+                            public void run() {
+                                isPlayerHidden = false; // player 다시 보이게 하기
+                                player.posX = (Main.SCREEN_WIDTH + 25) / 2;
+                                player.posY = (Main.SCREEN_HEIGHT - 50);
+                            }
+                        };
+                        loadingTimer.schedule(loadingTask, 5500);
+                        player.life--;
+                        lifeCount--;
+
+                        player.hp = 150;
+                        System.out.println("남은목숨: " + player.life);
+                    }
+                }
+            }
+        }
     }
     private void bossAttackProcess() {
-        if(boss!=null && cnt % 180 ==0) {   // 5.4초마다 공격
+        if (boss != null && cnt % 180 == 0) {   // 5.4초마다 공격
             for (int i = 0; i < 9; i++) {
-                bossAttack = new BossAttack(10, (Main.SCREEN_WIDTH - 10)/2, boss.height-20, new ImageIcon("src/images/boss_bullet.png").getImage());
+                bossAttack = new BossAttack(10, (Main.SCREEN_WIDTH - 10) / 2, boss.height - 20, new ImageIcon("src/images/boss_bullet.png").getImage());
                 bossAttackList.add(bossAttack);
             }
         }
-        for(int i=0; i<bossAttackList.size(); i++) {
+        for (int i = 0; i < bossAttackList.size(); i++) {
             bossAttack = bossAttackList.get(i);
             int methodIndex = i % 9;
             String methodName = "fire" + methodIndex;
             try {
                 Method fireMethod = BossAttack.class.getMethod(methodName);
                 fireMethod.invoke(bossAttack);
-            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e)  {
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
+            }
+        }
+        for (int i = 0; i < bossAttackList.size(); i++) {
+            bossAttack = bossAttackList.get(i);
+            if (!isPlayerHidden) {
+                if (Crash(bossAttack.posX, bossAttack.posY, player.posX, player.posY, bossAttack.width, bossAttack.height, player.width, player.height)) {
+                    isPlayerAttacked = true;
+                    bossAttackList.remove(i);
+                    player.hp -= 50;
+                    System.out.println("boss 피격");
+
+                    Timer loadingTimer3 = new Timer();  // player 공격당하면 반짝이는 효과
+                    TimerTask loadingTask3 = new TimerTask() {
+                        @Override
+                        public void run() {
+                            isPlayerAttacked = false;
+                        }
+                    };
+                    loadingTimer3.schedule(loadingTask3, 100);
+
+                    if (player.hp <= 0) {
+                        boomList.add(new Boom(player.posX, player.posY, 120, 120));
+                        isPlayerHidden = true;  // player 숨기기
+                        if (player.life <= 0) {
+                            Timer loadingTimer2 = new Timer();
+                            TimerTask loadingTask2 = new TimerTask() {
+                                @Override
+                                public void run() { // player 사망시 GameOver화면으로 전환
+                                    airportGame.isGameScreen = false;
+                                    airportGame.isGameOverScreen = true;
+                                }
+                            };
+                            loadingTimer2.schedule(loadingTask2, 1500);
+                        }
+                        Timer loadingTimer = new Timer();
+                        TimerTask loadingTask = new TimerTask() {
+                            @Override
+                            public void run() {
+                                isPlayerHidden = false; // player 다시 보이게 하기
+                                player.posX = (Main.SCREEN_WIDTH + 25) / 2;
+                                player.posY = (Main.SCREEN_HEIGHT - 50);
+                            }
+                        };
+                        loadingTimer.schedule(loadingTask, 5500);
+                        player.life--;
+                        lifeCount--;
+
+                        player.hp = 150;
+                        System.out.println("남은목숨: " + player.life);
+                    }
+                }
             }
         }
     }
@@ -551,14 +771,19 @@ public class Game extends Thread{
     }
 
     public void playerDraw(Graphics g) {
-        if (!isPlayerHidden) {
-            g.drawImage(player.image, player.posX, player.posY, player.width, player.height, null);
-            for (int i = 0; i < playerAttackList.size(); i++) {
-                playerAttack = playerAttackList.get(i);
-                g.drawImage(playerAttack.image, playerAttack.x, playerAttack.y, playerAttack.width, playerAttack.height, null);
+        if(!isPlayerAttacked) {
+            if (!isPlayerHidden) {
+                g.drawImage(player.image, player.posX, player.posY, player.width, player.height, null);
             }
+        } else if(isPlayerAttacked) {
+            g.drawImage(player.imageAttacked, player.posX, player.posY, player.width, player.height, null);
+        }
+        for (int i = 0; i < playerAttackList.size(); i++) {
+            playerAttack = playerAttackList.get(i);
+            g.drawImage(playerAttack.image, playerAttack.x, playerAttack.y, playerAttack.width, playerAttack.height, null);
         }
     }
+
     public void firstEnemyDraw(Graphics g) {
         for (int i = 0; i < firstEnemyList.size(); i++) {
             firstEnemy = firstEnemyList.get(i);

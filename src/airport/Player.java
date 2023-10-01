@@ -7,16 +7,18 @@ public class Player {
     protected int posX;
     protected int posY;
     protected Image image;
+    protected Image imageAttacked;
     protected int width;
     protected int height;
     protected int playerSpeed;
     protected int life;
 
-    public Player(int hp, int posX, int posY, Image image,int playerSpeed){
+    public Player(int hp, int posX, int posY, Image image,Image imageAttacked,int playerSpeed){
         this.hp = hp;
         this.posX = posX;
         this.posY = posY;
         this.image = image;
+        this.imageAttacked = imageAttacked;
         this.width = image.getWidth(null);
         this.height = image.getHeight(null);
         this.playerSpeed = playerSpeed;
